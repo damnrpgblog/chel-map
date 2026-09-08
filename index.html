@@ -3,20 +3,307 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Карта событий Челябинска</title>
+    <title>День города Челябинска — Маршрутизатор событий</title>
     
-    <!-- Leaflet (только по HTTPS) -->
+    <!-- Leaflet CSS & JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <style>
-        html, body {
+        :root {
+            --brand-dark: #121620;
+            --brand-red: #c82333;
+            --brand-accent: #e63946;
+            --bg-light: #f8f9fa;
+            --border-color: #e2e8f0;
+            --text-main: #212529;
+            --text-muted: #6c757d;
+        }
+
+        * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            width: 100%;
-            height: 100%;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: var(--text-main);
+            background: #fff;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
             overflow: hidden;
-            font-family: Arial, sans-serif;
+        }
+
+        /* ===== ШАПКА В СТИЛЕ СПЕЦПРОЕКТОВ «КОММЕРСАНТА» ===== */
+        .app-header {
+            background: var(--brand-dark);
+            color: white;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+            border-bottom: 3px solid var(--brand-red);
+        }
+
+        .app-title {
+            font-size: 17px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+
+        .app-title span {
+            color: #ff6b6b;
+        }
+
+        .app-badge {
+            background: rgba(255,255,255,0.12);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        /* ===== ГЛАВНЫЙ КОНТЕЙНЕР (САЙДБАР + КАРТА) ===== */
+        .app-body {
+            flex: 1;
+            display: flex;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* САЙДБАР */
+        .sidebar {
+            width: 380px;
+            min-width: 340px;
+            background: var(--bg-light);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+        }
+
+        /* Фильтры категорий */
+        .filter-bar {
+            padding: 10px 14px;
+            background: white;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .filter-bar::-webkit-scrollbar {
+            height: 4px;
+        }
+        .filter-bar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .filter-chip {
+            padding: 5px 11px;
+            border-radius: 16px;
+            border: 1px solid #cbd5e1;
+            background: white;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #475569;
+        }
+
+        .filter-chip:hover {
+            border-color: var(--brand-accent);
+            color: var(--brand-accent);
+        }
+
+        .filter-chip.active {
+            background: var(--brand-red);
+            color: white;
+            border-color: var(--brand-red);
+        }
+
+        /* Список карточек событий */
+        .events-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .event-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            position: relative;
+        }
+
+        .event-card:hover {
+            border-color: #94a3b8;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .event-card.selected {
+            border-color: var(--brand-accent);
+            background: #fff5f5;
+        }
+
+        .event-card-checkbox {
+            margin-top: 3px;
+            width: 17px;
+            height: 17px;
+            accent-color: var(--brand-red);
+            cursor: pointer;
+        }
+
+        .event-card-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .event-category-tag {
+            font-size: 10px;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: var(--brand-red);
+            letter-spacing: 0.5px;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .event-title {
+            font-size: 14px;
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: 4px;
+            color: var(--text-main);
+        }
+
+        .event-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .event-time-badge {
+            color: #b91c1c;
+            font-weight: 600;
+        }
+
+        /* Порядковый номер в маршруте */
+        .order-badge {
+            width: 22px;
+            height: 22px;
+            background: var(--brand-red);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: bold;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        /* НИЖНЯЯ ПАНЕЛЬ УПРАВЛЕНИЯ МАРШРУТОМ */
+        .route-summary-panel {
+            background: white;
+            border-top: 1px solid var(--border-color);
+            padding: 14px;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
+        }
+
+        .route-stats {
+            font-size: 13px;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .route-stats strong {
+            color: var(--brand-red);
+        }
+
+        /* Предупреждение о нехватке времени */
+        .conflict-alert {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+            border-radius: 6px;
+            padding: 7px 10px;
+            font-size: 12px;
+            margin-bottom: 10px;
+            display: none;
+            line-height: 1.3;
+        }
+
+        .conflict-alert.visible {
+            display: block;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn {
+            padding: 9px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: var(--brand-red);
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #a71d2a;
+        }
+
+        .btn-primary:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #cbd5e1;
+            color: var(--text-muted);
+        }
+
+        .btn-outline:hover {
+            border-color: #94a3b8;
+            color: var(--text-main);
+        }
+
+        /* ===== КАРТА ===== */
+        .map-wrapper {
+            flex: 1;
+            height: 100%;
+            position: relative;
         }
 
         #map {
@@ -24,56 +311,513 @@
             height: 100%;
         }
 
-        .popup-box {
+        /* Стили маркеров на карте */
+        .route-number-pin {
+            background: var(--brand-red);
+            color: white;
+            border: 2px solid white;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.35);
+        }
+
+        /* Всплывающее окно (Popup) */
+        .leaflet-popup-content-wrapper {
+            border-radius: 8px;
+            padding: 2px;
+        }
+
+        .popup-card {
             font-size: 13px;
             line-height: 1.4;
+            min-width: 190px;
         }
-        .popup-title {
-            font-weight: bold;
-            color: #1a1a2e;
+
+        .popup-card h4 {
             font-size: 14px;
+            margin: 4px 0;
+            color: var(--brand-dark);
         }
-        .popup-time {
-            color: #e94560;
-            font-weight: bold;
-            margin: 3px 0;
-            display: block;
+
+        .popup-card .time {
+            color: var(--brand-red);
+            font-weight: 700;
+            margin-bottom: 4px;
+            font-size: 12px;
+        }
+
+        .popup-card .desc {
+            color: #555;
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+
+        .popup-btn {
+            width: 100%;
+            padding: 6px;
+            font-size: 12px;
+            border: none;
+            border-radius: 4px;
+            background: var(--brand-red);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .popup-btn.selected {
+            background: #28a745;
+        }
+
+        /* Мобильная адаптивность */
+        @media (max-width: 768px) {
+            .app-body {
+                flex-direction: column-reverse;
+            }
+            .sidebar {
+                width: 100%;
+                min-width: 100%;
+                height: 50%;
+            }
+            .map-wrapper {
+                height: 50%;
+            }
         }
     </style>
 </head>
 <body>
 
-    <div id="map"></div>
+    <!-- Шапка -->
+    <header class="app-header">
+        <div class="app-title">Челябинск 2025: <span>Гид по Дню города</span></div>
+        <div class="app-badge">Спецпроект</div>
+    </header>
+
+    <div class="app-body">
+        <!-- Сайдбар слева -->
+        <aside class="sidebar">
+            <!-- Категории -->
+            <div class="filter-bar">
+                <button class="filter-chip active" data-cat="all">Все события</button>
+                <button class="filter-chip" data-cat="concert">🎵 Концерты</button>
+                <button class="filter-chip" data-cat="fair">🎨 Ярмарки & Еда</button>
+                <button class="filter-chip" data-cat="family">🎈 Семья & Дети</button>
+                <button class="filter-chip" data-cat="sport">🏃 Спорт</button>
+                <button class="filter-chip" data-cat="show">🎆 Шоу & Салют</button>
+            </div>
+
+            <!-- Список карточек -->
+            <div class="events-list" id="eventsList"></div>
+
+            <!-- Панель управления маршрутом -->
+            <div class="route-summary-panel">
+                <div class="conflict-alert" id="conflictAlert">
+                    ⚠️ <b>Внимание:</b> Время некоторых событий пересекается, либо вы можете не успеть дойти пешком.
+                </div>
+                <div class="route-stats" id="routeStats">
+                    Отметьте 2 или более событий, чтобы построить оптимальный маршрут по времени.
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-primary" id="btnFitRoute" disabled>Показать весь маршрут</button>
+                    <button class="btn btn-outline" id="btnClear">Сброс</button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Карта справа -->
+        <main class="map-wrapper">
+            <div id="map"></div>
+        </main>
+    </div>
 
     <script>
-        // Инициализация карты Челябинска
-        var map = L.map('map', {
-            zoomControl: true
-        }).setView([55.1604, 61.4026], 13);
-
-        // Слой карты OpenStreetMap
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap | Коммерсантъ',
-            maxZoom: 18
-        }).addTo(map);
-
-        // Тестовые точки
-        var points = [
-            { name: 'Площадь Революции (Главная сцена)', time: '10:00–22:00', desc: 'Праздничный концерт и открытие', lat: 55.1604, lng: 61.4026 },
-            { name: 'Пешеходная Кировка', time: '10:00–19:00', desc: 'Ярмарка и мастер-классы мастеров', lat: 55.1644, lng: 61.4370 },
-            { name: 'Набережная реки Миасс', time: '22:00', desc: 'Праздничный салют', lat: 55.1570, lng: 61.3950 }
+        // ===== БАЗА СОБЫТИЙ ДНЯ ГОРОДА В ЧЕЛЯБИНСКЕ =====
+        const eventsData = [
+            {
+                id: 1,
+                name: 'Открытие праздника и концерт',
+                category: 'concert',
+                categoryLabel: 'Концерты',
+                timeText: '10:00 – 11:30',
+                startHour: 10.0,
+                endHour: 11.5,
+                address: 'Площадь Революции',
+                desc: 'Торжественный старт праздничных мероприятий, поздравления и выступления коллективов.',
+                lat: 55.1604,
+                lng: 61.4026
+            },
+            {
+                id: 2,
+                name: 'Городской марафон «Челябинск, побежали!»',
+                category: 'sport',
+                categoryLabel: 'Спорт',
+                timeText: '09:00 – 11:00',
+                startHour: 9.0,
+                endHour: 11.0,
+                address: 'Набережная у Краеведческого музея',
+                desc: 'Массовый забег на 5 и 10 километров вдоль реки Миасс.',
+                lat: 55.1670,
+                lng: 61.3995
+            },
+            {
+                id: 3,
+                name: 'Уральская ремесленная ярмарка',
+                category: 'fair',
+                categoryLabel: 'Ярмарки & Еда',
+                timeText: '10:00 – 19:00',
+                startHour: 10.0,
+                endHour: 19.0,
+                address: 'Пешеходная Кировка',
+                desc: 'Мастера народных промыслов, кузнецы, гончары и сувениры ручной работы.',
+                lat: 55.1644,
+                lng: 61.4370
+            },
+            {
+                id: 4,
+                name: 'Фестиваль уличной еды «Уральский вкус»',
+                category: 'fair',
+                categoryLabel: 'Ярмарки & Еда',
+                timeText: '11:30 – 20:00',
+                startHour: 11.5,
+                endHour: 20.0,
+                address: 'Парк «Алое Поле»',
+                desc: 'Более 30 фуд-кортов, мастер-классы от шеф-поваров и гастрономические шоу.',
+                lat: 55.1590,
+                lng: 61.4100
+            },
+            {
+                id: 5,
+                name: 'Детский праздник «Мир фантазий»',
+                category: 'family',
+                categoryLabel: 'Семья & Дети',
+                timeText: '11:00 – 16:00',
+                startHour: 11.0,
+                endHour: 16.0,
+                address: 'ПКиО им. Гагарина (Главный вход)',
+                desc: 'Интерактивные спектакли, шоу мыльных пузырей и аниматоры.',
+                lat: 55.1640,
+                lng: 61.4180
+            },
+            {
+                id: 6,
+                name: 'Выставка уникальных ретро-автомобилей',
+                category: 'fair',
+                categoryLabel: 'Ярмарки & Еда',
+                timeText: '12:00 – 17:30',
+                startHour: 12.0,
+                endHour: 17.5,
+                address: 'Ул. Труда (у Концертного зала)',
+                desc: 'Раритетные машины советской и зарубежной эпохи, фотозоны.',
+                lat: 55.1550,
+                lng: 61.3970
+            },
+            {
+                id: 7,
+                name: 'Спортивный фестиваль и стритбол 3х3',
+                category: 'sport',
+                categoryLabel: 'Спорт',
+                timeText: '13:00 – 16:30',
+                startHour: 13.0,
+                endHour: 16.5,
+                address: 'Стадион «Центральный»',
+                desc: 'Турниры по уличному баскетболу, скейтбордингу и воркауту.',
+                lat: 55.1700,
+                lng: 61.4230
+            },
+            {
+                id: 8,
+                name: 'Рок-фестиваль под открытым небом',
+                category: 'concert',
+                categoryLabel: 'Концерты',
+                timeText: '15:00 – 18:00',
+                startHour: 15.0,
+                endHour: 18.0,
+                address: 'Площадь Революции',
+                desc: 'Выступления лучших уральских рок-групп и хедлайнеров фестиваля.',
+                lat: 55.1600,
+                lng: 61.4020
+            },
+            {
+                id: 9,
+                name: 'Джазовый вечер на открытой эстраде',
+                category: 'concert',
+                categoryLabel: 'Концерты',
+                timeText: '18:00 – 20:30',
+                startHour: 18.0,
+                endHour: 20.5,
+                address: 'Летний театр парка Гагарина',
+                desc: 'Вечер живой джазовой музыки в уютной атмосфере соснового парка.',
+                lat: 55.1645,
+                lng: 61.4200
+            },
+            {
+                id: 10,
+                name: 'Мультимедийное шоу светящихся дронов',
+                category: 'show',
+                categoryLabel: 'Шоу & Салют',
+                timeText: '21:00 – 21:30',
+                startHour: 21.0,
+                endHour: 21.5,
+                address: 'Набережная у Драмтеатра',
+                desc: 'Сотни дронов выстроят в небе символы и панорамы Челябинска.',
+                lat: 55.1585,
+                lng: 61.3980
+            },
+            {
+                id: 11,
+                name: 'Грандиозный праздничный фейерверк',
+                category: 'show',
+                categoryLabel: 'Шоу & Салют',
+                timeText: '22:00 – 22:20',
+                startHour: 22.0,
+                endHour: 22.33,
+                address: 'Набережная реки Миасс',
+                desc: 'Традиционный кульминационный салют Дня города.',
+                lat: 55.1570,
+                lng: 61.3950
+            }
         ];
 
-        points.forEach(function(pt) {
-            var marker = L.marker([pt.lat, pt.lng]).addTo(map);
-            marker.bindPopup(
-                '<div class="popup-box">' +
-                '<div class="popup-title">📍 ' + pt.name + '</div>' +
-                '<span class="popup-time">🕐 ' + pt.time + '</span>' +
-                '<div>' + pt.desc + '</div>' +
-                '</div>'
-            );
+        // ===== СОСТОЯНИЕ ПРИЛОЖЕНИЯ =====
+        let selectedIds = new Set();
+        let currentFilter = 'all';
+        let map;
+        let baseMarkers = {};
+        let routePolyline = null;
+        let routePinMarkers = [];
+
+        // Расчет расстояния (в км) между двумя точками
+        function calcDist(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+        }
+
+        // Получить выбранные события, отсортированные по времени
+        function getOrderedRoute() {
+            return eventsData
+                .filter(e => selectedIds.has(e.id))
+                .sort((a, b) => a.startHour - b.startHour);
+        }
+
+        // Инициализация карты
+        function initMap() {
+            map = L.map('map', {
+                zoomControl: true
+            }).setView([55.1610, 61.4050], 13);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap | Коммерсантъ',
+                maxZoom: 18
+            }).addTo(map);
+
+            // Создаем базовые маркеры
+            eventsData.forEach(evt => {
+                const marker = L.marker([evt.lat, evt.lng]).addTo(map);
+                marker.bindPopup(createPopupHtml(evt));
+                baseMarkers[evt.id] = marker;
+            });
+        }
+
+        function createPopupHtml(evt) {
+            const isSel = selectedIds.has(evt.id);
+            return `
+                <div class="popup-card">
+                    <span style="font-size:10px; color:#c82333; font-weight:700; text-transform:uppercase;">${evt.categoryLabel}</span>
+                    <h4>${evt.name}</h4>
+                    <div class="time">🕐 ${evt.timeText}</div>
+                    <div class="desc">${evt.desc}</div>
+                    <button class="popup-btn ${isSel ? 'selected' : ''}" onclick="toggleSelect(${evt.id})">
+                        ${isSel ? '✓ Выбрано' : '+ Добавить в маршрут'}
+                    </button>
+                </div>
+            `;
+        }
+
+        // Рендер сайдбара
+        function renderSidebar() {
+            const container = document.getElementById('eventsList');
+            const ordered = getOrderedRoute();
+
+            const filtered = eventsData.filter(e => currentFilter === 'all' || e.category === currentFilter);
+
+            container.innerHTML = filtered.map(evt => {
+                const isSelected = selectedIds.has(evt.id);
+                const orderIdx = ordered.findIndex(e => e.id === evt.id);
+
+                return `
+                    <div class="event-card ${isSelected ? 'selected' : ''}" onclick="toggleSelect(${evt.id})">
+                        <input type="checkbox" class="event-card-checkbox" ${isSelected ? 'checked' : ''} onclick="event.stopPropagation(); toggleSelect(${evt.id})">
+                        <div class="event-card-content">
+                            <span class="event-category-tag">${evt.categoryLabel}</span>
+                            <div class="event-title">${evt.name}</div>
+                            <div class="event-meta">
+                                <span class="event-time-badge">🕐 ${evt.timeText}</span>
+                                <span>📍 ${evt.address}</span>
+                            </div>
+                        </div>
+                        ${isSelected ? `<div class="order-badge">${orderIdx + 1}</div>` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Переключение выбора события
+        window.toggleSelect = function(id) {
+            if (selectedIds.has(id)) {
+                selectedIds.delete(id);
+            } else {
+                selectedIds.add(id);
+            }
+            updateApp();
+        };
+
+        // Обновление всей логики и интерфейса
+        function updateApp() {
+            const ordered = getOrderedRoute();
+
+            // Обновляем сайдбар
+            renderSidebar();
+
+            // Обновляем попапы на маркерах
+            eventsData.forEach(evt => {
+                baseMarkers[evt.id].setPopupContent(createPopupHtml(evt));
+            });
+
+            // Кнопка "Показать весь маршрут"
+            const btnFit = document.getElementById('btnFitRoute');
+            btnFit.disabled = ordered.length < 2;
+
+            // Расчет маршрута и проверка конфликтов времени
+            updateRouteCalculations(ordered);
+
+            // Отрисовка линии и номерных меток на карте
+            drawRouteOnMap(ordered);
+        }
+
+        // Расчет расстояния и проверка реалистичности маршрута
+        function updateRouteCalculations(ordered) {
+            const statsEl = document.getElementById('routeStats');
+            const alertEl = document.getElementById('conflictAlert');
+
+            if (ordered.length === 0) {
+                statsEl.innerHTML = 'Отметьте интересующие события, чтобы построить оптимальный маршрут.';
+                alertEl.classList.remove('visible');
+                return;
+            }
+
+            if (ordered.length === 1) {
+                statsEl.innerHTML = `Выбрано <strong>1 событие</strong>. Добавьте еще хотя бы одно, чтобы проложить путь.`;
+                alertEl.classList.remove('visible');
+                return;
+            }
+
+            // Считаем общее пешее расстояние
+            let totalKm = 0;
+            let hasConflict = false;
+
+            for (let i = 0; i < ordered.length - 1; i++) {
+                const cur = ordered[i];
+                const nxt = ordered[i + 1];
+                const dist = calcDist(cur.lat, cur.lng, nxt.lat, nxt.lng);
+                totalKm += dist;
+
+                // Пешая скорость ~ 4.5 км/ч
+                const walkHours = dist / 4.5;
+                if (cur.endHour + walkHours > nxt.startHour) {
+                    if (cur.endHour > nxt.startHour) {
+                        hasConflict = true;
+                    }
+                }
+            }
+
+            statsEl.innerHTML = `
+                Событий в маршруте: <strong>${ordered.length}</strong><br>
+                Пешая дистанция: <strong>~${totalKm.toFixed(1)} км</strong><br>
+                Тайминг: с <strong>${ordered[0].timeText.split('–')[0].trim()}</strong> до <strong>${ordered[ordered.length-1].timeText.split('–')[1].trim()}</strong>
+            `;
+
+            alertEl.classList.toggle('visible', hasConflict);
+        }
+
+        // Отрисовка маршрута на карте
+        function drawRouteOnMap(ordered) {
+            // Удаляем прошлые линии и номерные значки
+            if (routePolyline) {
+                map.removeLayer(routePolyline);
+                routePolyline = null;
+            }
+            routePinMarkers.forEach(m => map.removeLayer(m));
+            routePinMarkers = [];
+
+            if (ordered.length < 2) return;
+
+            const latlngs = ordered.map(e => [e.lat, e.lng]);
+
+            // Рисуем пунктирную линию
+            routePolyline = L.polyline(latlngs, {
+                color: '#c82333',
+                weight: 4,
+                opacity: 0.85,
+                dashArray: '8, 8',
+                lineJoin: 'round'
+            }).addTo(map);
+
+            // Добавляем круглые значки с порядковыми номерами
+            ordered.forEach((evt, idx) => {
+                const pinIcon = L.divIcon({
+                    html: `<div class="route-number-pin">${idx + 1}</div>`,
+                    className: '',
+                    iconSize: [28, 28],
+                    iconAnchor: [14, 14]
+                });
+
+                const pinMarker = L.marker([evt.lat, evt.lng], { 
+                    icon: pinIcon,
+                    zIndexOffset: 1000 
+                }).addTo(map);
+
+                routePinMarkers.push(pinMarker);
+            });
+        }
+
+        // Сброс выбора
+        document.getElementById('btnClear').addEventListener('click', () => {
+            selectedIds.clear();
+            updateApp();
+            map.setView([55.1610, 61.4050], 13);
         });
+
+        // Центрирование карты по маршруту
+        document.getElementById('btnFitRoute').addEventListener('click', () => {
+            if (routePinMarkers.length > 0) {
+                const group = L.featureGroup(routePinMarkers);
+                map.fitBounds(group.getBounds().pad(0.2));
+            }
+        });
+
+        // Фильтры
+        document.querySelectorAll('.filter-chip').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.dataset.cat;
+                renderSidebar();
+            });
+        });
+
+        // Запуск
+        initMap();
+        renderSidebar();
     </script>
 </body>
 </html>
