@@ -46,7 +46,7 @@
             overflow: hidden;
         }
 
-        /* УБИРАЕМ АТРИБУЦИЮ И ФЛАГ LEAFLET СПРАВА ВНИЗУ */
+        /* УБИРАЕМ АТРИБУЦИЮ LEAFLET */
         .leaflet-control-attribution {
             display: none !important;
         }
@@ -296,7 +296,7 @@
         .popup-btn { width: 100%; padding: 8px; border-radius: 6px; background: var(--brand-primary); color: white; border: none; margin-top: 10px; font-weight: 600; }
         .popup-btn.selected { background: var(--bg-app); color: var(--brand-primary); border: 1px solid var(--brand-primary); }
 
-        /* АДАПТАЦИЯ */
+        /* АДАПТАЦИЯ ДЛЯ МОБИЛЬНЫХ */
         @media (max-width: 900px) {
             .app-body {
                 flex-direction: column;
@@ -394,14 +394,7 @@
         let map, routePolyline = null, routePinMarkers = [];
         let baseMarkers = {};
 
-        function calcDist(lat1, lon1, lat2, lon2) {
-            const p = Math.PI/180;
-            const a = 0.5 - Math.cos((lat2-lat1)*p)/2 + Math.cos(lat1*p)*Math.cos(lat2*p) * (1-Math.cos((lon2-lon1)*p))/2;
-            return 12742 * Math.asin(Math.sqrt(a)); 
-        }
-
         function initMap() {
-            // Отключаем стандартный копирайт Leaflet при инициализации
             map = L.map('map', { 
                 zoomControl: false, 
                 attributionControl: false 
@@ -475,32 +468,69 @@
             if(ordered.length < 2) {
                 document.getElementById('routeStats').innerHTML = 'Отметьте события, чтобы составить график.';
                 document.getElementById('conflictAlert').classList.remove('visible');
+                drawRoute(ordered);
             } else {
-                let totalKm = 0, hasConflict = false;
+                let hasConflict = false;
                 for(let i=0; i<ordered.length-1; i++){
-                    totalKm += calcDist(ordered[i].lat, ordered[i].lng, ordered[i+1].lat, ordered[i+1].lng);
                     if(ordered[i].endHour > ordered[i+1].startHour) hasConflict = true;
                 }
-                document.getElementById('routeStats').innerHTML = `Событий: <strong>${ordered.length}</strong> | Дистанция: <strong>~${totalKm.toFixed(1)} км</strong>`;
                 document.getElementById('conflictAlert').classList.toggle('visible', hasConflict);
+                
+                // Строим пешеходный маршрут через OSRM API
+                drawRoute(ordered);
             }
-            
-            drawRoute(ordered);
         }
 
-        function drawRoute(ordered) {
-            if(routePolyline) map.removeLayer(routePolyline);
+        // ===== ПЕШЕХОДНЫЙ МАРШРУТ ЧЕРЕЗ OSRM API =====
+        async function drawRoute(ordered) {
+            if(routePolyline) { map.removeLayer(routePolyline); routePolyline = null; }
             routePinMarkers.forEach(m => map.removeLayer(m));
             routePinMarkers = [];
             
             if(ordered.length < 2) return;
-            
-            routePolyline = L.polyline(ordered.map(e => [e.lat, e.lng]), { color: 'rgb(0,68,101)', weight: 3, dashArray: '8,8' }).addTo(map);
-            
+
+            // Сначала ставим номерные маркеры
             ordered.forEach((evt, idx) => {
                 const icon = L.divIcon({ html: `<div class="route-number-pin">${idx+1}</div>`, className: '', iconSize:[28,28], iconAnchor:[14,14] });
                 routePinMarkers.push(L.marker([evt.lat, evt.lng], {icon, zIndexOffset:1000}).addTo(map));
             });
+
+            // Формируем координаты для OSRM (в формате: долгота,широта;долгота,широта)
+            const coordsStr = ordered.map(e => `${e.lng},${e.lat}`).join(';');
+            const osrmUrl = `https://router.project-osrm.org/route/v1/foot/${coordsStr}?overview=full&geometries=geojson`;
+
+            try {
+                const response = await fetch(osrmUrl);
+                const data = await response.json();
+
+                if (data.code === 'Ok' && data.routes.length > 0) {
+                    const route = data.routes[0];
+                    // Переводим координаты из [lng, lat] обратно в [lat, lng] для Leaflet
+                    const pathCoords = route.geometry.coordinates.map(coord => [coord[1], coord[0]]);
+                    
+                    // Рисуем пешеходный трек по улицам
+                    routePolyline = L.polyline(pathCoords, { 
+                        color: 'rgb(0,68,101)', 
+                        weight: 4, 
+                        opacity: 0.85,
+                        lineCap: 'round',
+                        lineJoin: 'round'
+                    }).addTo(map);
+
+                    // Считаем точное расстояние по улицам в километрах
+                    const distanceKm = (route.distance / 1000).toFixed(1);
+                    const walkMinutes = Math.round(route.duration / 60);
+                    
+                    document.getElementById('routeStats').innerHTML = `Событий: <strong>${ordered.length}</strong> | Пешком по городу: <strong>~${distanceKm} км</strong> (около ${walkMinutes} мин)`;
+                } else {
+                    throw new Error('Маршрут не найден');
+                }
+            } catch (err) {
+                // Если нет соединения с сервером OSRM — строим обычную пунктирную линию
+                const fallbackCoords = ordered.map(e => [e.lat, e.lng]);
+                routePolyline = L.polyline(fallbackCoords, { color: 'rgb(0,68,101)', weight: 3, dashArray: '8,8' }).addTo(map);
+                document.getElementById('routeStats').innerHTML = `Событий: <strong>${ordered.length}</strong> в маршруте`;
+            }
         }
 
         document.getElementById('btnClear').addEventListener('click', () => { selectedIds.clear(); updateApp(); map.setView([55.1700, 61.3700], 11); });
