@@ -36,7 +36,6 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* Делаем высоту естественной для встраивания в статью */
         html, body {
             height: auto;
             min-height: 100%;
@@ -89,10 +88,10 @@
             width: 100%;
         }
 
-        /* КАРТА (БОЛЬШАЯ И НАГЛЯДНАЯ) */
+        /* КВАДРАТНЫЙ ВЬЮПОРТ КАРТЫ (1:1) */
         .map-wrapper {
             width: 100%;
-            height: 420px; /* Увеличено для отличного обзора */
+            aspect-ratio: 1 / 1; /* Карта всегда идеальный квадрат */
             position: relative;
             background: #e5e5e5;
             border-bottom: 2px solid var(--brand-primary);
@@ -143,7 +142,7 @@
             border-color: var(--brand-primary);
         }
 
-        /* ПАНЕЛЬ МАРШРУТА ПРЯМО ПОД КАРТОЙ И ФИЛЬТРАМИ */
+        /* ПАНЕЛЬ МАРШРУТА */
         .route-summary-panel {
             background: var(--bg-panel);
             border-bottom: 1px solid var(--border-light);
@@ -186,7 +185,7 @@
         .btn-primary:disabled { background: #cbd5e1; cursor: not-allowed; }
         .btn-outline { background: transparent; border: 1px solid var(--border-light); color: var(--text-gray); flex: 0.3; }
 
-        /* СПИСОК СОБЫТИЙ СВОБОДНО РАСКРЫВАЕТСЯ */
+        /* СПИСОК СОБЫТИЙ */
         .events-list {
             padding: 14px 16px;
             display: flex;
@@ -199,7 +198,7 @@
             background: var(--brand-white);
             border: 1px solid transparent;
             border-radius: 12px;
-            padding: 14px;
+            padding: 12px 14px;
             cursor: pointer;
             transition: all 0.2s ease;
             display: flex;
@@ -232,14 +231,14 @@
             padding: 2px 6px;
             border-radius: 4px;
             display: inline-block;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
 
         .event-title {
-            font-size: 14px;
+            font-size: 13.5px;
             font-weight: 700;
             line-height: 1.3;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             color: var(--text-dark);
         }
 
@@ -248,7 +247,7 @@
             color: var(--text-gray);
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 2px;
         }
         .event-time-badge { color: var(--text-dark); font-weight: 600; }
 
@@ -371,7 +370,7 @@
                 baseMarkers[evt.id] = marker;
             });
             
-            setTimeout(() => map.invalidateSize(), 500);
+            setTimeout(() => map.invalidateSize(), 400);
         }
 
         function createPopupHtml(evt) {
