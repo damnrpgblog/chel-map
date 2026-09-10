@@ -36,7 +36,7 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* ПОЛНОСТЬЮ ОТКЛЮЧАЕМ ВНУТРЕННЮЮ ПРОКРУТКУ */
+        /* ПОЛНОСТЬЮ ОТКЛЮЧАЕМ ВНУТРЕННЮЮ ПРОКРУТКУ СТРАНИЦЫ */
         html, body {
             height: auto !important;
             overflow: hidden !important;
@@ -86,7 +86,7 @@
             width: 100%;
         }
 
-        /* КАРТА С ОПТИМАЛЬНЫМ ПРОПОРЦИОНАЛЬНЫМ РАЗМЕРОМ */
+        /* КАРТА */
         .map-wrapper {
             width: 100%;
             height: 380px;
@@ -139,7 +139,7 @@
             border-color: var(--brand-primary);
         }
 
-        /* ПАНЕЛЬ МАРШРУТА ПРЯМО ПОД ФИЛЬТРАМИ */
+        /* ПАНЕЛЬ МАРШРУТА */
         .route-summary-panel {
             background: var(--bg-panel);
             border-bottom: 1px solid var(--border-light);
@@ -182,7 +182,7 @@
         .btn-primary:disabled { background: #cbd5e1; cursor: not-allowed; }
         .btn-outline { background: transparent; border: 1px solid var(--border-light); color: var(--text-gray); flex: 0.3; }
 
-        /* ЕСТЕСТВЕННЫЙ СПИСОК БЕЗ СКРОЛЛБАРОВ */
+        /* СПИСОК СОБЫТИЙ */
         .events-list {
             padding: 14px 16px;
             display: flex;
@@ -264,21 +264,49 @@
             flex-shrink: 0;
         }
 
-        /* МАРКЕРЫ И ПОПАПЫ */
-        .route-number-pin {
+        /* ===== КРУГЛЫЕ МАРКЕРЫ С ИКОНКАМИ ===== */
+        .category-marker-pin {
             background: var(--brand-primary);
             color: var(--brand-white);
             border: 2px solid var(--brand-white);
             border-radius: 50%;
-            width: 28px;
-            height: 28px;
+            width: 32px;
+            height: 32px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
-            font-weight: bold;
-            box-shadow: 0 4px 10px rgba(0, 68, 101, 0.4);
+            font-size: 15px;
+            box-shadow: 0 4px 10px rgba(0, 68, 101, 0.35);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer;
         }
+
+        .category-marker-pin:hover {
+            transform: scale(1.2);
+            box-shadow: 0 6px 14px rgba(0, 68, 101, 0.5);
+        }
+
+        /* КРУГЛЫЕ ЗНАЧКИ ПОРЯДКОВОГО НОМЕРА В МАРШРУТЕ */
+        .route-number-pin {
+            background: #c82333; /* Яркий акцентный цвет для активного маршрута */
+            color: var(--brand-white);
+            border: 2px solid var(--brand-white);
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 800;
+            box-shadow: 0 4px 12px rgba(200, 35, 51, 0.5);
+            transition: transform 0.2s ease;
+        }
+
+        .route-number-pin:hover {
+            transform: scale(1.2);
+        }
+
         .leaflet-tile-pane { filter: contrast(95%) saturate(60%) brightness(105%); }
         .leaflet-popup-content-wrapper { border-radius: 12px; padding: 0; box-shadow: var(--shadow-hover); }
         .leaflet-popup-content { margin: 0; }
@@ -329,21 +357,21 @@
 
     <script>
         const eventsData = [
-            { id: 15, name: 'Сольный стендап Андрея Атласа (18+)', category: 'concert', categoryLabel: 'Концерты', timeText: '19:00 – 20:30', startHour: 19.0, endHour: 20.5, address: 'Стендап клуб (ул. Цвиллинга, 15)', desc: 'Резидент Stand Up на ТНТ. Сбор в 18:00.', lat: 55.1582, lng: 61.4045 },
-            { id: 14, name: 'Детская шоу-игра «НеРеалити»', category: 'show', categoryLabel: 'Шоу', timeText: '18:00 – 20:00', startHour: 18.0, endHour: 20.0, address: 'Лофт «Семья» (ул. Сталеваров, 5д)', desc: 'Челленджи, животные, DJ. Запись: 8-951-487-55-56.', lat: 55.2508, lng: 61.3975 },
-            { id: 13, name: 'Праздник «День цифры»', category: 'art', categoryLabel: 'Арт & Тех', timeText: '10:00 – 16:00', startHour: 10.0, endHour: 16.0, address: 'Горсад им. А.С. Пушкина', desc: 'VR, роботы, профориентация.', lat: 55.1558, lng: 61.4022 },
-            { id: 11, name: 'Концерт в «Парковом Премиум»', category: 'concert', categoryLabel: 'Концерты', timeText: '13:00 – 14:00', startHour: 13.0, endHour: 14.0, address: 'мкр. «Парковый Премиум»', desc: 'Народные песни и танцы.', lat: 55.2345, lng: 61.2980 },
-            { id: 12, name: 'Оркестр «Парус» в «Привилегии»', category: 'concert', categoryLabel: 'Концерты', timeText: '17:00 – 19:00', startHour: 17.0, endHour: 19.0, address: 'мкр. «Привилегия»', desc: 'Джаз и хиты советского рока.', lat: 55.1275, lng: 61.2485 },
-            { id: 10, name: 'Фестиваль в «РМК Экстрим»', category: 'sport', categoryLabel: 'Экстрим', timeText: '10:30 – 19:00', startHour: 10.5, endHour: 19.0, address: 'ул. 250-летия Челябинска, 38', desc: 'BMX, скейт, стритбол, слэм-данк шоу.', lat: 55.1770, lng: 61.2990 },
-            { id: 1, name: 'Фестиваль индустрий «ШКИпер»', category: 'art', categoryLabel: 'Арт & Тех', timeText: '12:00', startHour: 12.0, endHour: 15.0, address: 'Тополиная аллея', desc: 'Видеосборка и презентации.', lat: 55.1725, lng: 61.3060 },
-            { id: 2, name: 'Гастрофестиваль', category: 'fest', categoryLabel: 'Еда', timeText: '12:00 – 18:00', startHour: 12.0, endHour: 18.0, address: 'Набережная р. Миасс', desc: 'Угощения от уральских шефов.', lat: 55.1690, lng: 61.4010 },
-            { id: 3, name: 'Фестиваль «ЧелТрансФест»', category: 'fest', categoryLabel: 'Фестивали', timeText: '13:00 – 17:00', startHour: 13.0, endHour: 17.0, address: 'ул. Карла Маркса', desc: 'Выставка общественного транспорта.', lat: 55.1662, lng: 61.4050 },
-            { id: 4, name: 'Праздник радио «Континенталь»', category: 'concert', categoryLabel: 'Концерты', timeText: '17:00 – 21:00', startHour: 17.0, endHour: 21.0, address: 'Арт-сквер, Набережная', desc: 'Звезды эстрады, конкурсы.', lat: 55.1685, lng: 61.4035 },
-            { id: 5, name: 'Концерт со звездами эстрады', category: 'concert', categoryLabel: 'Концерты', timeText: '17:00 – 21:30', startHour: 17.0, endHour: 21.5, address: 'Торговый центр (Каслинская, 64)', desc: 'Главный концерт города.', lat: 55.1728, lng: 61.3980 },
-            { id: 6, name: 'Флайборд-шоу', category: 'show', categoryLabel: 'Шоу', timeText: '21:45 – 22:00', startHour: 21.75, endHour: 22.0, address: 'Акватория р. Миасс (у ТЦ)', desc: 'Трюки на гидроциклах.', lat: 55.1720, lng: 61.3995 },
-            { id: 7, name: 'Праздничный фейерверк', category: 'show', categoryLabel: 'Шоу', timeText: '22:00 – 22:20', startHour: 22.0, endHour: 22.33, address: 'Набережная р. Миасс', desc: 'Кульминация Дня города.', lat: 55.1695, lng: 61.3990 },
-            { id: 8, name: 'Выставка «Игра. Цифра»', category: 'art', categoryLabel: 'Арт & Тех', timeText: '10:00 – 20:00', startHour: 10.0, endHour: 20.0, address: 'ул. Труда, 183', desc: 'Мультимедийные инсталляции.', lat: 55.1692, lng: 61.3735 },
-            { id: 9, name: 'Урал в сказаниях', category: 'art', categoryLabel: 'Арт & Тех', timeText: '09:00 – 21:00', startHour: 9.0, endHour: 21.0, address: 'Галерея «Люба Петя»', desc: 'Уральский фольклор в картинах.', lat: 55.1555, lng: 61.3685 }
+            { id: 15, name: 'Сольный стендап Андрея Атласа (18+)', category: 'concert', categoryLabel: 'Концерты', icon: '🎤', timeText: '19:00 – 20:30', startHour: 19.0, endHour: 20.5, address: 'Стендап клуб (ул. Цвиллинга, 15)', desc: 'Резидент Stand Up на ТНТ. Сбор в 18:00.', lat: 55.1582, lng: 61.4045 },
+            { id: 14, name: 'Детская шоу-игра «НеРеалити»', category: 'show', categoryLabel: 'Шоу', icon: '🎭', timeText: '18:00 – 20:00', startHour: 18.0, endHour: 20.0, address: 'Лофт «Семья» (ул. Сталеваров, 5д)', desc: 'Челленджи, животные, DJ. Запись: 8-951-487-55-56.', lat: 55.2508, lng: 61.3975 },
+            { id: 13, name: 'Праздник «День цифры»', category: 'art', categoryLabel: 'Арт & Тех', icon: '🤖', timeText: '10:00 – 16:00', startHour: 10.0, endHour: 16.0, address: 'Горсад им. А.С. Пушкина', desc: 'VR, роботы, профориентация.', lat: 55.1558, lng: 61.4022 },
+            { id: 11, name: 'Концерт в «Парковом Премиум»', category: 'concert', categoryLabel: 'Концерты', icon: '🎵', timeText: '13:00 – 14:00', startHour: 13.0, endHour: 14.0, address: 'мкр. «Парковый Премиум»', desc: 'Народные песни и танцы.', lat: 55.2345, lng: 61.2980 },
+            { id: 12, name: 'Оркестр «Парус» в «Привилегии»', category: 'concert', categoryLabel: 'Концерты', icon: '🎷', timeText: '17:00 – 19:00', startHour: 17.0, endHour: 19.0, address: 'мкр. «Привилегия»', desc: 'Джаз и хиты советского рока.', lat: 55.1275, lng: 61.2485 },
+            { id: 10, name: 'Фестиваль в «РМК Экстрим»', category: 'sport', categoryLabel: 'Экстрим', icon: '🛹', timeText: '10:30 – 19:00', startHour: 10.5, endHour: 19.0, address: 'ул. 250-летия Челябинска, 38', desc: 'BMX, скейт, стритбол, слэм-данк шоу.', lat: 55.1770, lng: 61.2990 },
+            { id: 1, name: 'Фестиваль индустрий «ШКИпер»', category: 'art', categoryLabel: 'Арт & Тех', icon: '🎨', timeText: '12:00', startHour: 12.0, endHour: 15.0, address: 'Тополиная аллея', desc: 'Видеосборка и презентации.', lat: 55.1725, lng: 61.3060 },
+            { id: 2, name: 'Гастрофестиваль', category: 'fest', categoryLabel: 'Еда', icon: '🍔', timeText: '12:00 – 18:00', startHour: 12.0, endHour: 18.0, address: 'Набережная р. Миасс', desc: 'Угощения от уральских шефов.', lat: 55.1690, lng: 61.4010 },
+            { id: 3, name: 'Фестиваль «ЧелТрансФест»', category: 'fest', categoryLabel: 'Фестивали', icon: '🚌', timeText: '13:00 – 17:00', startHour: 13.0, endHour: 17.0, address: 'ул. Карла Маркса', desc: 'Выставка общественного транспорта.', lat: 55.1662, lng: 61.4050 },
+            { id: 4, name: 'Праздник радио «Континенталь»', category: 'concert', categoryLabel: 'Концерты', icon: '📻', timeText: '17:00 – 21:00', startHour: 17.0, endHour: 21.0, address: 'Арт-сквер, Набережная', desc: 'Звезды эстрады, конкурсы.', lat: 55.1685, lng: 61.4035 },
+            { id: 5, name: 'Концерт со звездами эстрады', category: 'concert', categoryLabel: 'Концерты', icon: '🎤', timeText: '17:00 – 21:30', startHour: 17.0, endHour: 21.5, address: 'Торговый центр (Каслинская, 64)', desc: 'Главный концерт города.', lat: 55.1728, lng: 61.3980 },
+            { id: 6, name: 'Флайборд-шоу', category: 'show', categoryLabel: 'Шоу', icon: '🌊', timeText: '21:45 – 22:00', startHour: 21.75, endHour: 22.0, address: 'Акватория р. Миасс (у ТЦ)', desc: 'Трюки на гидроциклах.', lat: 55.1720, lng: 61.3995 },
+            { id: 7, name: 'Праздничный фейерверк', category: 'show', categoryLabel: 'Шоу', icon: '🎆', timeText: '22:00 – 22:20', startHour: 22.0, endHour: 22.33, address: 'Набережная р. Миасс', desc: 'Кульминация Дня города.', lat: 55.1695, lng: 61.3990 },
+            { id: 8, name: 'Выставка «Игра. Цифра»', category: 'art', categoryLabel: 'Арт & Тех', icon: '💻', timeText: '10:00 – 20:00', startHour: 10.0, endHour: 20.0, address: 'ул. Труда, 183', desc: 'Мультимедийные инсталляции.', lat: 55.1692, lng: 61.3735 },
+            { id: 9, name: 'Урал в сказаниях', category: 'art', categoryLabel: 'Арт & Тех', icon: '🖼️', timeText: '09:00 – 21:00', startHour: 9.0, endHour: 21.0, address: 'Галерея «Люба Петя»', desc: 'Уральский фольклор в картинах.', lat: 55.1555, lng: 61.3685 }
         ];
 
         let selectedIds = new Set();
@@ -352,7 +380,6 @@
         let baseMarkers = {};
 
         function initMap() {
-            // ОТКЛЮЧАЕМ scrollWheelZoom, чтобы прокрутка страницы над картой не застревала
             map = L.map('map', { 
                 zoomControl: false, 
                 attributionControl: false,
@@ -365,8 +392,18 @@
                 maxZoom: 18
             }).addTo(map);
 
+            // Создаем круглые маркеры с иконками для каждого события
             eventsData.forEach(evt => {
-                const marker = L.marker([evt.lat, evt.lng]).addTo(map);
+                const iconHtml = `<div class="category-marker-pin">${evt.icon}</div>`;
+                const customIcon = L.divIcon({
+                    html: iconHtml,
+                    className: '',
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 16],
+                    popupAnchor: [0, -16]
+                });
+
+                const marker = L.marker([evt.lat, evt.lng], { icon: customIcon }).addTo(map);
                 marker.bindPopup(createPopupHtml(evt));
                 baseMarkers[evt.id] = marker;
             });
@@ -378,7 +415,7 @@
             const isSel = selectedIds.has(evt.id);
             return `<div class="popup-card">
                         <span class="event-category-tag">${evt.categoryLabel}</span>
-                        <h4>${evt.name}</h4>
+                        <h4>${evt.icon} ${evt.name}</h4>
                         <div class="time">🕒 ${evt.timeText}</div>
                         <div style="font-size: 11px; color: #64748b; margin-bottom: 6px;">📍 ${evt.address}</div>
                         <button class="popup-btn ${isSel ? 'selected' : ''}" onclick="toggleSelect(${evt.id})">
@@ -400,7 +437,7 @@
                         <input type="checkbox" class="event-card-checkbox" ${isSelected ? 'checked' : ''} onclick="event.stopPropagation(); toggleSelect(${evt.id})">
                         <div class="event-card-content">
                             <span class="event-category-tag">${evt.categoryLabel}</span>
-                            <div class="event-title">${evt.name}</div>
+                            <div class="event-title">${evt.icon} ${evt.name}</div>
                             <div class="event-meta">
                                 <span class="event-time-badge">🕒 ${evt.timeText}</span>
                                 <span>📍 ${evt.address}</span>
@@ -445,8 +482,14 @@
             
             if(ordered.length < 2) return;
 
+            // На месте выбранных точек ставим круглые значки с номерами шагов
             ordered.forEach((evt, idx) => {
-                const icon = L.divIcon({ html: `<div class="route-number-pin">${idx+1}</div>`, className: '', iconSize:[28,28], iconAnchor:[14,14] });
+                const icon = L.divIcon({ 
+                    html: `<div class="route-number-pin">${idx+1}</div>`, 
+                    className: '', 
+                    iconSize:[32,32], 
+                    iconAnchor:[16,16] 
+                });
                 routePinMarkers.push(L.marker([evt.lat, evt.lng], {icon, zIndexOffset:1000}).addTo(map));
             });
 
