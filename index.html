@@ -131,33 +131,64 @@
         }
         .route-stats strong { color: var(--text-dark); font-weight: 600; }
 
-        /* Легенда цветов участков маршрута */
+        /* ИНТЕРАКТИВНАЯ ЛЕГЕНДА */
         .route-legend {
             display: none;
             flex-wrap: wrap;
             gap: 6px;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
+            background: var(--bg-app);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border-light);
         }
         .route-legend.visible { display: flex; }
+
+        .route-legend-title {
+            width: 100%;
+            font-size: 11px;
+            color: var(--text-gray);
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
 
         .legend-item {
             display: inline-flex;
             align-items: center;
             gap: 5px;
-            font-size: 11px;
-            color: var(--text-gray);
-            background: var(--bg-app);
+            font-size: 12px;
+            color: var(--text-dark);
+            background: var(--brand-white);
+            border: 1px solid var(--border-light);
             border-radius: 20px;
-            padding: 3px 8px 3px 5px;
+            padding: 4px 10px 4px 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .legend-item:hover {
+            border-color: var(--text-gray);
+            background: #f8fafc;
+        }
+
+        /* Выключенный (скрытый) участок */
+        .legend-item.inactive {
+            opacity: 0.4;
+            background: transparent;
+            box-shadow: none;
+            filter: grayscale(100%);
+            text-decoration: line-through;
         }
 
         .legend-dot {
-            width: 10px;
-            height: 10px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
             flex-shrink: 0;
-            border: 1.5px solid #fff;
-            box-shadow: 0 0 0 1px rgba(0,0,0,0.08);
+            border: 2px solid #fff;
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
         }
 
         .conflict-alert {
@@ -374,7 +405,6 @@
     </div>
 
     <script>
-        // Ваши обновлённые координаты
         const eventsData = [
             { id: 15, name: 'Сольный стендап Андрея Атласа (18+)', category: 'concert', categoryLabel: 'Концерты', icon: '🎤', timeText: '19:00 – 20:30', startHour: 19.0, endHour: 20.5, address: 'Стендап клуб (ул. Ленина, 66)', desc: 'Резидент Stand Up на ТНТ. Сбор в 18:00.', lat: 55.1606216, lng: 61.3805545 },
             { id: 14, name: 'Детская шоу-игра «НеРеалити»', category: 'show', categoryLabel: 'Шоу', icon: '🎭', timeText: '18:00 – 20:00', startHour: 18.0, endHour: 20.0, address: 'Лофт «Семья» (ул. Сталеваров, 5д)', desc: 'Челленджи, животные, DJ. Запись: 8-951-487-55-56.', lat: 55.262864, lng: 61.4046565 },
@@ -393,27 +423,19 @@
             { id: 9, name: 'Урал в сказаниях', category: 'art', categoryLabel: 'Арт & Тех', icon: '🖼️', timeText: '09:00 – 21:00', startHour: 9.0, endHour: 21.0, address: 'Галерея «Люба Петя» (Лесопарковая, 5)', desc: 'Уральский фольклор в картинах.', lat: 55.156909588386526, lng: 61.36534312249293 }
         ];
 
-        // Палитра: каждый участок маршрута — свой цвет
         const SEGMENT_COLORS = [
-            '#004465', // фирменный синий
-            '#0E7C7B', // бирюза
-            '#C45C26', // терракота
-            '#5B4B8A', // фиолетовый
-            '#2A9D8F', // зелёный
-            '#B08900', // золото
-            '#9B2226', // бордо
-            '#1D3557', // тёмно-синий
-            '#457B9D', // голубой
-            '#6A994E'  // оливковый
+            '#004465', '#0E7C7B', '#C45C26', '#5B4B8A', '#2A9D8F',
+            '#B08900', '#9B2226', '#1D3557', '#457B9D', '#6A994E'
         ];
 
         let selectedIds = new Set();
         let currentFilter = 'all';
         let map;
-        let routeLayers = [];      // все линии участков
+        let routeLayers = [];      
         let routePinMarkers = [];
         let baseMarkers = {};
-        let drawToken = 0;         // защита от гонок при быстром клике
+        let drawToken = 0;         
+        let interactiveSegments = []; // Хранилище слоёв для переключения
 
         function initMap() {
             map = L.map('map', {
@@ -516,6 +538,7 @@
             routeLayers = [];
             routePinMarkers.forEach(m => map.removeLayer(m));
             routePinMarkers = [];
+            interactiveSegments = [];
         }
 
         function renderLegend(segmentCount) {
@@ -526,22 +549,41 @@
                 return;
             }
 
-            let html = '';
+            let html = `<div class="route-legend-title">Кликайте на кнопки ниже, чтобы скрыть или показать отрезки пути:</div>`;
             for (let i = 0; i < segmentCount; i++) {
                 const color = SEGMENT_COLORS[i % SEGMENT_COLORS.length];
                 html += `
-                    <span class="legend-item">
+                    <span class="legend-item" id="legend-btn-${i}" onclick="toggleSegmentVisibility(${i})">
                         <span class="legend-dot" style="background:${color}"></span>
-                        ${i + 1}→${i + 2}
+                        Шаг ${i + 1} → ${i + 2}
                     </span>`;
             }
             legend.innerHTML = html;
             legend.classList.add('visible');
         }
 
-        // Рисует один участок: белая подложка + цветная линия сверху
-        function addSegmentLine(latlngs, color) {
-            // Светлая обводка — чтобы линии не сливались на пересечениях
+        // Переключение видимости конкретного сегмента (вызывается из HTML легенды)
+        window.toggleSegmentVisibility = function(index) {
+            const seg = interactiveSegments.find(s => s.index === index);
+            if (!seg) return;
+
+            seg.visible = !seg.visible;
+
+            if (seg.visible) {
+                seg.casing.addTo(map);
+                seg.line.addTo(map);
+            } else {
+                map.removeLayer(seg.casing);
+                map.removeLayer(seg.line);
+            }
+
+            const btn = document.getElementById('legend-btn-' + index);
+            if (btn) {
+                btn.classList.toggle('inactive', !seg.visible);
+            }
+        };
+
+        function addSegmentLine(latlngs, color, index) {
             const casing = L.polyline(latlngs, {
                 color: '#ffffff',
                 weight: 8,
@@ -559,6 +601,14 @@
             }).addTo(map);
 
             routeLayers.push(casing, line);
+
+            // Сохраняем в массив для переключателей
+            interactiveSegments.push({
+                index: index,
+                casing: casing,
+                line: line,
+                visible: true
+            });
         }
 
         async function fetchFootSegment(from, to) {
@@ -583,7 +633,6 @@
             const token = ++drawToken;
             clearRouteLayers();
 
-            // Номерные маркеры — цвет совпадает с «входящим» участком / стартом
             ordered.forEach((evt, idx) => {
                 const color = idx === 0
                     ? SEGMENT_COLORS[0]
@@ -605,7 +654,6 @@
             let totalDistance = 0;
             let totalDuration = 0;
 
-            // Каждый участок строим отдельно — свой цвет
             const tasks = [];
             for (let i = 0; i < ordered.length - 1; i++) {
                 tasks.push(
@@ -625,14 +673,13 @@
 
             const results = await Promise.all(tasks);
 
-            // Если пользователь уже изменил выбор — не рисуем устаревший маршрут
             if (token !== drawToken) return;
 
             results
                 .sort((a, b) => a.index - b.index)
                 .forEach(result => {
                     const color = SEGMENT_COLORS[result.index % SEGMENT_COLORS.length];
-                    addSegmentLine(result.seg.coords, color);
+                    addSegmentLine(result.seg.coords, color, result.index);
                     totalDistance += result.seg.distance || 0;
                     totalDuration += result.seg.duration || 0;
                 });
@@ -644,7 +691,7 @@
                     `Событий: <strong>${ordered.length}</strong> | Пешком по городу: <strong>~${distanceKm} км</strong> (около ${walkMinutes} мин)`;
             } else {
                 document.getElementById('routeStats').innerHTML =
-                    `Событий: <strong>${ordered.length}</strong> в маршруте · участки отмечены разными цветами`;
+                    `Событий: <strong>${ordered.length}</strong> в маршруте`;
             }
         }
 
