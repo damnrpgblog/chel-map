@@ -173,7 +173,6 @@
             background: #f8fafc;
         }
 
-        /* Выключенный (скрытый) участок */
         .legend-item.inactive {
             opacity: 0.4;
             background: transparent;
@@ -345,8 +344,11 @@
         .leaflet-tile-pane { filter: contrast(95%) saturate(60%) brightness(105%); }
         .leaflet-popup-content-wrapper { border-radius: 12px; padding: 0; box-shadow: var(--shadow-hover); }
         .leaflet-popup-content { margin: 0; }
-        .popup-card { padding: 14px; min-width: 220px; font-size: 12px; line-height: 1.4; }
-        .popup-card h4 { font-size: 14px; margin: 4px 0; color: var(--text-dark); }
+        
+        /* СТИЛИЗАЦИЯ ПОП-АПА */
+        .popup-card { padding: 14px; min-width: 230px; max-width: 280px; font-size: 12px; line-height: 1.4; }
+        .popup-card h4 { font-size: 14px; margin: 4px 0; color: var(--text-dark); line-height: 1.3; }
+        .popup-card .desc { font-size: 12px; color: #475569; margin: 6px 0; line-height: 1.35; border-top: 1px solid #f1f5f9; padding-top: 6px; }
         .popup-btn {
             width: 100%;
             padding: 8px;
@@ -356,6 +358,7 @@
             border: none;
             margin-top: 10px;
             font-weight: 600;
+            cursor: pointer;
         }
         .popup-btn.selected {
             background: var(--bg-app);
@@ -406,21 +409,21 @@
 
     <script>
         const eventsData = [
-            { id: 15, name: 'Сольный стендап Андрея Атласа (18+)', category: 'concert', categoryLabel: 'Концерты', icon: '🎤', timeText: '19:00 – 20:30', startHour: 19.0, endHour: 20.5, address: 'Стендап клуб (ул. Ленина, 66)', desc: 'Резидент Stand Up на ТНТ. Сбор в 18:00.', lat: 55.1606216, lng: 61.3805545 },
-            { id: 14, name: 'Детская шоу-игра «НеРеалити»', category: 'show', categoryLabel: 'Шоу', icon: '🎭', timeText: '18:00 – 20:00', startHour: 18.0, endHour: 20.0, address: 'Лофт «Семья» (ул. Сталеваров, 5д)', desc: 'Челленджи, животные, DJ. Запись: 8-951-487-55-56.', lat: 55.262864, lng: 61.4046565 },
-            { id: 13, name: 'Праздник «День цифры»', category: 'art', categoryLabel: 'Арт & Тех', icon: '🤖', timeText: '10:00 – 16:00', startHour: 10.0, endHour: 16.0, address: 'Горсад им. А.С. Пушкина', desc: 'VR, роботы, профориентация.', lat: 55.1548939, lng: 61.4014253 },
-            { id: 11, name: 'Концерт в «Парковом Премиум»', category: 'concert', categoryLabel: 'Концерты', icon: '🎵', timeText: '13:00 – 14:00', startHour: 13.0, endHour: 14.0, address: 'мкр. «Парковый Премиум»', desc: 'Народные песни и танцы.', lat: 55.2330, lng: 61.2725 },
-            { id: 12, name: 'Оркестр «Парус» в «Привилегии»', category: 'concert', categoryLabel: 'Концерты', icon: '🎷', timeText: '17:00 – 19:00', startHour: 17.0, endHour: 19.0, address: 'мкр. «Привилегия» (Западный)', desc: 'Джаз и хиты советского рока.', lat: 55.1325, lng: 61.2290 },
-            { id: 10, name: 'Фестиваль в «РМК Экстрим»', category: 'sport', categoryLabel: 'Экстрим', icon: '🛹', timeText: '10:30 – 19:00', startHour: 10.5, endHour: 19.0, address: 'Скейт-парк у Торгового Центра', desc: 'BMX, скейт, стритбол, слэм-данк шоу.', lat: 55.17373098944806, lng: 61.39017345437165 },
-            { id: 1, name: 'Фестиваль индустрий «ШКИпер»', category: 'art', categoryLabel: 'Арт & Тех', icon: '🎨', timeText: '12:00', startHour: 12.0, endHour: 15.0, address: 'Тополиная аллея (ул. Ак. Королева)', desc: 'Видеосборка и презентации.', lat: 55.163214485032775, lng: 61.29553144348386 },
-            { id: 2, name: 'Гастрофестиваль «Блюда от верблюда»', category: 'fest', categoryLabel: 'Еда', icon: '🍔', timeText: '12:00 – 18:00', startHour: 12.0, endHour: 18.0, address: 'Набережная р. Миасс (у Музея)', desc: 'Угощения от уральских шефов.', lat: 55.170032395344705, lng: 61.40867295333185 },
-            { id: 3, name: 'Фестиваль «ЧелТрансФест»', category: 'fest', categoryLabel: 'Фестивали', icon: '🚌', timeText: '13:00 – 17:00', startHour: 13.0, endHour: 17.0, address: 'ул. Карла Маркса / Кировка', desc: 'Выставка общественного транспорта.', lat: 55.165510, lng: 61.407115 },
-            { id: 4, name: 'Праздник радио «Континенталь»', category: 'concert', categoryLabel: 'Концерты', icon: '📻', timeText: '17:00 – 21:00', startHour: 17.0, endHour: 21.0, address: 'Арт-сквер, Набережная', desc: 'Звезды эстрады, конкурсы.', lat: 55.16964053823514, lng: 61.40750585393017 },
-            { id: 5, name: 'Большой праздничный концерт', category: 'concert', categoryLabel: 'Концерты', icon: '🎤', timeText: '17:00 – 21:30', startHour: 17.0, endHour: 21.5, address: 'Торговый центр', desc: 'Главный концерт города.', lat: 55.17235034820487, lng: 61.39259182738609 },
-            { id: 6, name: 'Флайборд-шоу', category: 'show', categoryLabel: 'Шоу', icon: '🌊', timeText: '21:45 – 22:00', startHour: 21.75, endHour: 22.0, address: 'Акватория р. Миасс (у ТЦ)', desc: 'Трюки на гидроциклах.', lat: 55.1710, lng: 61.3975 },
-            { id: 7, name: 'Праздничный фейерверк', category: 'show', categoryLabel: 'Шоу', icon: '🎆', timeText: '22:00 – 22:20', startHour: 22.0, endHour: 22.33, address: 'Набережная р. Миасс', desc: 'Кульминация Дня города.', lat: 55.1690, lng: 61.3985 },
-            { id: 8, name: 'Выставка «Игра. Цифра. Искусство»', category: 'art', categoryLabel: 'Арт & Тех', icon: '💻', timeText: '10:00 – 20:00', startHour: 10.0, endHour: 20.0, address: 'ул. Труда, 183', desc: 'Мультимедийные инсталляции.', lat: 55.1683099343741, lng: 61.374794239448306 },
-            { id: 9, name: 'Урал в сказаниях', category: 'art', categoryLabel: 'Арт & Тех', icon: '🖼️', timeText: '09:00 – 21:00', startHour: 9.0, endHour: 21.0, address: 'Галерея «Люба Петя» (Лесопарковая, 5)', desc: 'Уральский фольклор в картинах.', lat: 55.156909588386526, lng: 61.36534312249293 }
+            { id: 15, name: 'Сольный стендап Андрея Атласа (18+)', category: 'concert', categoryLabel: 'Концерты', icon: '🎤', timeText: '19:00 – 20:30', startHour: 19.0, endHour: 20.5, address: 'Стендап клуб (ул. Ленина, 66)', desc: 'Популярный резидент Stand Up на ТНТ с новой сольной программой. Целый час лучших шуток. Сбор гостей с 18:00.', lat: 55.1606216, lng: 61.3805545 },
+            { id: 14, name: 'Детская шоу-игра «НеРеалити»', category: 'show', categoryLabel: 'Шоу', icon: '🎭', timeText: '18:00 – 20:00', startHour: 18.0, endHour: 20.0, address: 'Лофт «Семья» (ул. Сталеваров, 5д)', desc: 'Интерактивные челленджи из «Битвы титанов» и «Форт Боярд», спецэффекты, экзотические животные и DJ. Для детей 6–12 лет.', lat: 55.262864, lng: 61.4046565 },
+            { id: 13, name: 'Праздник «День цифры»', category: 'art', categoryLabel: 'Арт & Тех', icon: '🤖', timeText: '10:00 – 16:00', startHour: 10.0, endHour: 16.0, address: 'Горсад им. А.С. Пушкина', desc: 'Игра в «Нейрокампусе», открытая зона «ЦифроДвиж», VR-тренажёры, робототехника, ЦифроКвиз и IT-профориентация.', lat: 55.1548939, lng: 61.4014253 },
+            { id: 11, name: 'Концерт в «Парковом Премиум»', category: 'concert', categoryLabel: 'Концерты', icon: '🎵', timeText: '13:00 – 14:00', startHour: 13.0, endHour: 14.0, address: 'мкр. «Парковый Премиум»', desc: 'Праздничная программа с народными песнями, танцами и яркими выступлениями клубных коллективов.', lat: 55.2330, lng: 61.2725 },
+            { id: 12, name: 'Оркестр «Парус» в «Привилегии»', category: 'concert', categoryLabel: 'Концерты', icon: '🎷', timeText: '17:00 – 19:00', startHour: 17.0, endHour: 19.0, address: 'мкр. «Привилегия» (Западный)', desc: 'Концерт эстрадного оркестра под управлением Юрия Коровина под открытым небом: джаз, хиты советского рока и современные песни.', lat: 55.1325, lng: 61.2290 },
+            { id: 10, name: 'Фестиваль в «РМК Экстрим»', category: 'sport', categoryLabel: 'Экстрим', icon: '🛹', timeText: '10:30 – 19:00', startHour: 10.5, endHour: 19.0, address: 'Скейт-парк у Торгового Центра', desc: 'Финалы соревнований по BMX и скейту, шоу-матч Hoops vs БК «Курчатов» и слэм-данк шоу Мирослава Елецкого.', lat: 55.17373098944806, lng: 61.39017345437165 },
+            { id: 1, name: 'Фестиваль индустрий «ШКИпер»', category: 'art', categoryLabel: 'Арт & Тех', icon: '🎨', timeText: '12:00', startHour: 12.0, endHour: 15.0, address: 'Тополиная аллея (ул. Ак. Королева)', desc: 'Сезон «Видеосборка»: презентации медиапроектов, креативные лаборатории и интерактивные зоны.', lat: 55.163214485032775, lng: 61.29553144348386 },
+            { id: 2, name: 'Гастрофестиваль «Блюда от верблюда»', category: 'fest', categoryLabel: 'Еда', icon: '🍔', timeText: '12:00 – 18:00', startHour: 12.0, endHour: 18.0, address: 'Набережная р. Миасс (у Музея)', desc: 'Угощения и дегустации от ведущих уральских шеф-поваров, блюда традиционной и авторской кухни.', lat: 55.170032395344705, lng: 61.40867295333185 },
+            { id: 3, name: 'Фестиваль «ЧелТрансФест»', category: 'fest', categoryLabel: 'Фестивали', icon: '🚌', timeText: '13:00 – 17:00', startHour: 13.0, endHour: 17.0, address: 'ул. Карла Маркса / Кировка', desc: 'Выставка современной и раритетной техники общественного транспорта Челябинска, фотозоны.', lat: 55.165510, lng: 61.407115 },
+            { id: 4, name: 'Праздник радио «Континенталь»', category: 'concert', categoryLabel: 'Концерты', icon: '📻', timeText: '17:00 – 21:00', startHour: 17.0, endHour: 21.0, address: 'Арт-сквер, Набережная', desc: 'Большой праздничный концерт с участием звезд российской эстрады, конкурсы с подарками от радиостанции.', lat: 55.16964053823514, lng: 61.40750585393017 },
+            { id: 5, name: 'Большой праздничный концерт', category: 'concert', categoryLabel: 'Концерты', icon: '🎤', timeText: '17:00 – 21:30', startHour: 17.0, endHour: 21.5, address: 'Торговый центр', desc: 'Главная праздничная сцена: выступления приглашенных звезд российской эстрады и лучших коллективов города.', lat: 55.17235034820487, lng: 61.39259182738609 },
+            { id: 6, name: 'Флайборд-шоу', category: 'show', categoryLabel: 'Шоу', icon: '🌊', timeText: '21:45 – 22:00', startHour: 21.75, endHour: 22.0, address: 'Акватория р. Миасс (у ТЦ)', desc: 'Захватывающее экстремальное шоу на воде: трюки на гидроциклах и флайбордах со светящейся подсветкой.', lat: 55.1710, lng: 61.3975 },
+            { id: 7, name: 'Праздничный фейерверк', category: 'show', categoryLabel: 'Шоу', icon: '🎆', timeText: '22:00 – 22:20', startHour: 22.0, endHour: 22.33, address: 'Набережная р. Миасс', desc: 'Грандиозный пиротехнический салют над акваторией реки Миасс в честь 290-летия Челябинска. Длительность: 20 минут.', lat: 55.1690, lng: 61.3985 },
+            { id: 8, name: 'Выставка «Игра. Цифра. Искусство»', category: 'art', categoryLabel: 'Арт & Тех', icon: '💻', timeText: '10:00 – 20:00', startHour: 10.0, endHour: 20.0, address: 'ул. Труда, 183', desc: 'Цифровое искусство Урала: мультимедийные инсталляции, AR/VR арт-объекты и цифровые картины.', lat: 55.1683099343741, lng: 61.374794239448306 },
+            { id: 9, name: 'Урал в сказаниях', category: 'art', categoryLabel: 'Арт & Тех', icon: '🖼️', timeText: '09:00 – 21:00', startHour: 9.0, endHour: 21.0, address: 'Галерея «Люба Петя» (Лесопарковая, 5)', desc: 'Выставка «Южный Урал в легендах и сказаниях»: живопись и скульптура по мотивам уральского фольклора.', lat: 55.156909588386526, lng: 61.36534312249293 }
         ];
 
         const SEGMENT_COLORS = [
@@ -435,7 +438,7 @@
         let routePinMarkers = [];
         let baseMarkers = {};
         let drawToken = 0;         
-        let interactiveSegments = []; // Хранилище слоёв для переключения
+        let interactiveSegments = [];
 
         function initMap() {
             map = L.map('map', {
@@ -473,7 +476,8 @@
                         <span class="event-category-tag">${evt.categoryLabel}</span>
                         <h4>${evt.icon} ${evt.name}</h4>
                         <div class="time">🕒 ${evt.timeText}</div>
-                        <div style="font-size: 11px; color: #64748b; margin-bottom: 6px;">📍 ${evt.address}</div>
+                        <div class="desc">${evt.desc}</div>
+                        <div style="font-size: 11px; color: #64748b; margin-top: 4px; margin-bottom: 6px;">📍 ${evt.address}</div>
                         <button class="popup-btn ${isSel ? 'selected' : ''}" onclick="toggleSelect(${evt.id})">
                             ${isSel ? '✓ В маршруте' : '+ Добавить'}
                         </button>
@@ -562,7 +566,6 @@
             legend.classList.add('visible');
         }
 
-        // Переключение видимости конкретного сегмента (вызывается из HTML легенды)
         window.toggleSegmentVisibility = function(index) {
             const seg = interactiveSegments.find(s => s.index === index);
             if (!seg) return;
@@ -602,7 +605,6 @@
 
             routeLayers.push(casing, line);
 
-            // Сохраняем в массив для переключателей
             interactiveSegments.push({
                 index: index,
                 casing: casing,
