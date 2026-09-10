@@ -5,25 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>День города Челябинска — Спецпроект</title>
     
-    <!-- Leaflet CSS & JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <style>
         :root {
-            /* Фирменные цвета Коммерсанта */
             --brand-primary: rgb(0, 68, 101);
             --brand-primary-hover: rgb(0, 50, 80);
             --brand-white: rgb(255, 255, 255);
-            
-            /* Фоны и текст */
             --bg-app: #f4f7f9;
             --bg-panel: #ffffff;
             --border-light: #e2e8f0;
             --text-dark: #1e293b;
             --text-gray: #64748b;
-            
-            /* Тени */
             --shadow-sm: 0 2px 4px rgba(0,0,0,0.04);
             --shadow-md: 0 4px 12px rgba(0, 68, 101, 0.08);
             --shadow-hover: 0 8px 16px rgba(0, 68, 101, 0.15);
@@ -44,11 +38,8 @@
             color: var(--text-dark);
         }
 
-        .leaflet-control-attribution {
-            display: none !important;
-        }
+        .leaflet-control-attribution { display: none !important; }
 
-        /* ШАПКА */
         .app-header {
             background: var(--brand-primary);
             color: var(--brand-white);
@@ -58,15 +49,8 @@
             justify-content: space-between;
         }
 
-        .app-title {
-            font-size: 16px;
-            font-weight: 700;
-        }
-
-        .app-title span {
-            font-weight: 400;
-            opacity: 0.9;
-        }
+        .app-title { font-size: 16px; font-weight: 700; }
+        .app-title span { font-weight: 400; opacity: 0.9; }
 
         .app-badge {
             background: rgba(255, 255, 255, 0.15);
@@ -84,7 +68,6 @@
             width: 100%;
         }
 
-        /* КВАДРАТНЫЙ ВЬЮПОРТ КАРТЫ */
         .map-wrapper {
             width: 100%;
             aspect-ratio: 1 / 1;
@@ -93,10 +76,7 @@
             border-bottom: 2px solid var(--brand-primary);
         }
 
-        #map {
-            width: 100%;
-            height: 100%;
-        }
+        #map { width: 100%; height: 100%; }
 
         .sidebar {
             width: 100%;
@@ -105,7 +85,6 @@
             flex-direction: column;
         }
 
-        /* Фильтры */
         .filter-bar {
             padding: 12px 16px;
             background: var(--bg-panel);
@@ -114,8 +93,8 @@
             gap: 8px;
             overflow-x: auto;
             white-space: nowrap;
-            -ms-overflow-style: none;  
-            scrollbar-width: none;  
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
         .filter-bar::-webkit-scrollbar { display: none; }
 
@@ -137,7 +116,6 @@
             border-color: var(--brand-primary);
         }
 
-        /* ПАНЕЛЬ МАРШРУТА */
         .route-summary-panel {
             background: var(--bg-panel);
             border-bottom: 1px solid var(--border-light);
@@ -152,6 +130,35 @@
             color: var(--text-gray);
         }
         .route-stats strong { color: var(--text-dark); font-weight: 600; }
+
+        /* Легенда цветов участков маршрута */
+        .route-legend {
+            display: none;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+        .route-legend.visible { display: flex; }
+
+        .legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            color: var(--text-gray);
+            background: var(--bg-app);
+            border-radius: 20px;
+            padding: 3px 8px 3px 5px;
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            border: 1.5px solid #fff;
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.08);
+        }
 
         .conflict-alert {
             background: #fff8e6;
@@ -178,9 +185,13 @@
         }
         .btn-primary { background: var(--brand-primary); color: var(--brand-white); }
         .btn-primary:disabled { background: #cbd5e1; cursor: not-allowed; }
-        .btn-outline { background: transparent; border: 1px solid var(--border-light); color: var(--text-gray); flex: 0.3; }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border-light);
+            color: var(--text-gray);
+            flex: 0.3;
+        }
 
-        /* СПИСОК СОБЫТИЙ */
         .events-list {
             padding: 14px 16px;
             display: flex;
@@ -262,7 +273,6 @@
             flex-shrink: 0;
         }
 
-        /* КРУГЛЫЕ МАРКЕРЫ */
         .category-marker-pin {
             background: var(--brand-primary);
             color: var(--brand-white);
@@ -285,7 +295,6 @@
         }
 
         .route-number-pin {
-            background: #c82333;
             color: var(--brand-white);
             border: 2px solid var(--brand-white);
             border-radius: 50%;
@@ -296,21 +305,32 @@
             justify-content: center;
             font-size: 13px;
             font-weight: 800;
-            box-shadow: 0 4px 12px rgba(200, 35, 51, 0.5);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
             transition: transform 0.2s ease;
         }
 
-        .route-number-pin:hover {
-            transform: scale(1.2);
-        }
+        .route-number-pin:hover { transform: scale(1.15); }
 
         .leaflet-tile-pane { filter: contrast(95%) saturate(60%) brightness(105%); }
         .leaflet-popup-content-wrapper { border-radius: 12px; padding: 0; box-shadow: var(--shadow-hover); }
         .leaflet-popup-content { margin: 0; }
         .popup-card { padding: 14px; min-width: 220px; font-size: 12px; line-height: 1.4; }
         .popup-card h4 { font-size: 14px; margin: 4px 0; color: var(--text-dark); }
-        .popup-btn { width: 100%; padding: 8px; border-radius: 6px; background: var(--brand-primary); color: white; border: none; margin-top: 10px; font-weight: 600; }
-        .popup-btn.selected { background: var(--bg-app); color: var(--brand-primary); border: 1px solid var(--brand-primary); }
+        .popup-btn {
+            width: 100%;
+            padding: 8px;
+            border-radius: 6px;
+            background: var(--brand-primary);
+            color: white;
+            border: none;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+        .popup-btn.selected {
+            background: var(--bg-app);
+            color: var(--brand-primary);
+            border: 1px solid var(--brand-primary);
+        }
     </style>
 </head>
 <body>
@@ -342,6 +362,7 @@
                 <div class="route-stats" id="routeStats">
                     Отметьте события в списке ниже, чтобы составить график.
                 </div>
+                <div class="route-legend" id="routeLegend"></div>
                 <div class="btn-group">
                     <button class="btn btn-primary" id="btnFitRoute" disabled>Смотреть маршрут на карте</button>
                     <button class="btn btn-outline" id="btnClear">Сброс</button>
@@ -353,7 +374,7 @@
     </div>
 
     <script>
-        // ===== УТОЧНЕННЫЕ КООРДИНАТЫ ДЛЯ ЧЕЛЯБИНСКА =====
+        // Ваши обновлённые координаты
         const eventsData = [
             { id: 15, name: 'Сольный стендап Андрея Атласа (18+)', category: 'concert', categoryLabel: 'Концерты', icon: '🎤', timeText: '19:00 – 20:30', startHour: 19.0, endHour: 20.5, address: 'Стендап клуб (ул. Ленина, 66)', desc: 'Резидент Stand Up на ТНТ. Сбор в 18:00.', lat: 55.1606216, lng: 61.3805545 },
             { id: 14, name: 'Детская шоу-игра «НеРеалити»', category: 'show', categoryLabel: 'Шоу', icon: '🎭', timeText: '18:00 – 20:00', startHour: 18.0, endHour: 20.0, address: 'Лофт «Семья» (ул. Сталеваров, 5д)', desc: 'Челленджи, животные, DJ. Запись: 8-951-487-55-56.', lat: 55.262864, lng: 61.4046565 },
@@ -372,16 +393,33 @@
             { id: 9, name: 'Урал в сказаниях', category: 'art', categoryLabel: 'Арт & Тех', icon: '🖼️', timeText: '09:00 – 21:00', startHour: 9.0, endHour: 21.0, address: 'Галерея «Люба Петя» (Лесопарковая, 5)', desc: 'Уральский фольклор в картинах.', lat: 55.156909588386526, lng: 61.36534312249293 }
         ];
 
+        // Палитра: каждый участок маршрута — свой цвет
+        const SEGMENT_COLORS = [
+            '#004465', // фирменный синий
+            '#0E7C7B', // бирюза
+            '#C45C26', // терракота
+            '#5B4B8A', // фиолетовый
+            '#2A9D8F', // зелёный
+            '#B08900', // золото
+            '#9B2226', // бордо
+            '#1D3557', // тёмно-синий
+            '#457B9D', // голубой
+            '#6A994E'  // оливковый
+        ];
+
         let selectedIds = new Set();
         let currentFilter = 'all';
-        let map, routePolyline = null, routePinMarkers = [];
+        let map;
+        let routeLayers = [];      // все линии участков
+        let routePinMarkers = [];
         let baseMarkers = {};
+        let drawToken = 0;         // защита от гонок при быстром клике
 
         function initMap() {
-            map = L.map('map', { 
-                zoomControl: false, 
+            map = L.map('map', {
+                zoomControl: false,
                 attributionControl: false,
-                scrollWheelZoom: false 
+                scrollWheelZoom: false
             }).setView([55.1700, 61.3700], 11);
 
             L.control.zoom({ position: 'topright' }).addTo(map);
@@ -391,9 +429,8 @@
             }).addTo(map);
 
             eventsData.forEach(evt => {
-                const iconHtml = `<div class="category-marker-pin">${evt.icon}</div>`;
                 const customIcon = L.divIcon({
-                    html: iconHtml,
+                    html: `<div class="category-marker-pin">${evt.icon}</div>`,
                     className: '',
                     iconSize: [32, 32],
                     iconAnchor: [16, 16],
@@ -404,7 +441,7 @@
                 marker.bindPopup(createPopupHtml(evt));
                 baseMarkers[evt.id] = marker;
             });
-            
+
             setTimeout(() => map.invalidateSize(), 400);
         }
 
@@ -423,7 +460,7 @@
 
         function renderSidebar() {
             const container = document.getElementById('eventsList');
-            const ordered = eventsData.filter(e => selectedIds.has(e.id)).sort((a,b) => a.startHour - b.startHour);
+            const ordered = eventsData.filter(e => selectedIds.has(e.id)).sort((a, b) => a.startHour - b.startHour);
             const filtered = eventsData.filter(e => currentFilter === 'all' || e.category === currentFilter);
 
             container.innerHTML = filtered.map(evt => {
@@ -451,81 +488,174 @@
         };
 
         function updateApp() {
-            const ordered = eventsData.filter(e => selectedIds.has(e.id)).sort((a,b) => a.startHour - b.startHour);
+            const ordered = eventsData.filter(e => selectedIds.has(e.id)).sort((a, b) => a.startHour - b.startHour);
             renderSidebar();
-            
+
             eventsData.forEach(evt => baseMarkers[evt.id].setPopupContent(createPopupHtml(evt)));
-            
+
             document.getElementById('btnFitRoute').disabled = ordered.length < 2;
-            
-            if(ordered.length < 2) {
+
+            if (ordered.length < 2) {
                 document.getElementById('routeStats').innerHTML = 'Отметьте события в списке ниже, чтобы составить график.';
                 document.getElementById('conflictAlert').classList.remove('visible');
-                drawRoute(ordered);
+                document.getElementById('routeLegend').classList.remove('visible');
+                document.getElementById('routeLegend').innerHTML = '';
+                clearRouteLayers();
             } else {
                 let hasConflict = false;
-                for(let i=0; i<ordered.length-1; i++){
-                    if(ordered[i].endHour > ordered[i+1].startHour) hasConflict = true;
+                for (let i = 0; i < ordered.length - 1; i++) {
+                    if (ordered[i].endHour > ordered[i + 1].startHour) hasConflict = true;
                 }
                 document.getElementById('conflictAlert').classList.toggle('visible', hasConflict);
                 drawRoute(ordered);
             }
         }
 
-        async function drawRoute(ordered) {
-            if(routePolyline) { map.removeLayer(routePolyline); routePolyline = null; }
+        function clearRouteLayers() {
+            routeLayers.forEach(l => map.removeLayer(l));
+            routeLayers = [];
             routePinMarkers.forEach(m => map.removeLayer(m));
             routePinMarkers = [];
-            
-            if(ordered.length < 2) return;
+        }
 
+        function renderLegend(segmentCount) {
+            const legend = document.getElementById('routeLegend');
+            if (segmentCount < 1) {
+                legend.classList.remove('visible');
+                legend.innerHTML = '';
+                return;
+            }
+
+            let html = '';
+            for (let i = 0; i < segmentCount; i++) {
+                const color = SEGMENT_COLORS[i % SEGMENT_COLORS.length];
+                html += `
+                    <span class="legend-item">
+                        <span class="legend-dot" style="background:${color}"></span>
+                        ${i + 1}→${i + 2}
+                    </span>`;
+            }
+            legend.innerHTML = html;
+            legend.classList.add('visible');
+        }
+
+        // Рисует один участок: белая подложка + цветная линия сверху
+        function addSegmentLine(latlngs, color) {
+            // Светлая обводка — чтобы линии не сливались на пересечениях
+            const casing = L.polyline(latlngs, {
+                color: '#ffffff',
+                weight: 8,
+                opacity: 0.95,
+                lineCap: 'round',
+                lineJoin: 'round'
+            }).addTo(map);
+
+            const line = L.polyline(latlngs, {
+                color: color,
+                weight: 5,
+                opacity: 0.95,
+                lineCap: 'round',
+                lineJoin: 'round'
+            }).addTo(map);
+
+            routeLayers.push(casing, line);
+        }
+
+        async function fetchFootSegment(from, to) {
+            const url = `https://router.project-osrm.org/route/v1/foot/${from.lng},${from.lat};${to.lng},${to.lat}?overview=full&geometries=geojson`;
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (data.code !== 'Ok' || !data.routes || !data.routes[0]) {
+                throw new Error('no route');
+            }
+
+            const route = data.routes[0];
+            const pathCoords = route.geometry.coordinates.map(c => [c[1], c[0]]);
+            return {
+                coords: pathCoords,
+                distance: route.distance,
+                duration: route.duration
+            };
+        }
+
+        async function drawRoute(ordered) {
+            const token = ++drawToken;
+            clearRouteLayers();
+
+            // Номерные маркеры — цвет совпадает с «входящим» участком / стартом
             ordered.forEach((evt, idx) => {
-                const icon = L.divIcon({ 
-                    html: `<div class="route-number-pin">${idx+1}</div>`, 
-                    className: '', 
-                    iconSize:[32,32], 
-                    iconAnchor:[16,16] 
+                const color = idx === 0
+                    ? SEGMENT_COLORS[0]
+                    : SEGMENT_COLORS[(idx - 1) % SEGMENT_COLORS.length];
+
+                const icon = L.divIcon({
+                    html: `<div class="route-number-pin" style="background:${color}">${idx + 1}</div>`,
+                    className: '',
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 16]
                 });
-                routePinMarkers.push(L.marker([evt.lat, evt.lng], {icon, zIndexOffset:1000}).addTo(map));
+                routePinMarkers.push(
+                    L.marker([evt.lat, evt.lng], { icon, zIndexOffset: 1000 }).addTo(map)
+                );
             });
 
-            const coordsStr = ordered.map(e => `${e.lng},${e.lat}`).join(';');
-            const osrmUrl = `https://router.project-osrm.org/route/v1/foot/${coordsStr}?overview=full&geometries=geojson`;
+            renderLegend(ordered.length - 1);
 
-            try {
-                const response = await fetch(osrmUrl);
-                const data = await response.json();
+            let totalDistance = 0;
+            let totalDuration = 0;
 
-                if (data.code === 'Ok' && data.routes.length > 0) {
-                    const route = data.routes[0];
-                    const pathCoords = route.geometry.coordinates.map(coord => [coord[1], coord[0]]);
-                    
-                    routePolyline = L.polyline(pathCoords, { 
-                        color: 'rgb(0,68,101)', 
-                        weight: 4, 
-                        opacity: 0.85,
-                        lineCap: 'round',
-                        lineJoin: 'round'
-                    }).addTo(map);
+            // Каждый участок строим отдельно — свой цвет
+            const tasks = [];
+            for (let i = 0; i < ordered.length - 1; i++) {
+                tasks.push(
+                    fetchFootSegment(ordered[i], ordered[i + 1])
+                        .then(seg => ({ ok: true, index: i, seg }))
+                        .catch(() => ({
+                            ok: false,
+                            index: i,
+                            seg: {
+                                coords: [[ordered[i].lat, ordered[i].lng], [ordered[i + 1].lat, ordered[i + 1].lng]],
+                                distance: 0,
+                                duration: 0
+                            }
+                        }))
+                );
+            }
 
-                    const distanceKm = (route.distance / 1000).toFixed(1);
-                    const walkMinutes = Math.round(route.duration / 60);
-                    
-                    document.getElementById('routeStats').innerHTML = `Событий: <strong>${ordered.length}</strong> | Пешком по городу: <strong>~${distanceKm} км</strong> (около ${walkMinutes} мин)`;
-                } else {
-                    throw new Error('Маршрут не найден');
-                }
-            } catch (err) {
-                const fallbackCoords = ordered.map(e => [e.lat, e.lng]);
-                routePolyline = L.polyline(fallbackCoords, { color: 'rgb(0,68,101)', weight: 3, dashArray: '8,8' }).addTo(map);
-                document.getElementById('routeStats').innerHTML = `Событий: <strong>${ordered.length}</strong> в маршруте`;
+            const results = await Promise.all(tasks);
+
+            // Если пользователь уже изменил выбор — не рисуем устаревший маршрут
+            if (token !== drawToken) return;
+
+            results
+                .sort((a, b) => a.index - b.index)
+                .forEach(result => {
+                    const color = SEGMENT_COLORS[result.index % SEGMENT_COLORS.length];
+                    addSegmentLine(result.seg.coords, color);
+                    totalDistance += result.seg.distance || 0;
+                    totalDuration += result.seg.duration || 0;
+                });
+
+            if (totalDistance > 0) {
+                const distanceKm = (totalDistance / 1000).toFixed(1);
+                const walkMinutes = Math.max(1, Math.round(totalDuration / 60));
+                document.getElementById('routeStats').innerHTML =
+                    `Событий: <strong>${ordered.length}</strong> | Пешком по городу: <strong>~${distanceKm} км</strong> (около ${walkMinutes} мин)`;
+            } else {
+                document.getElementById('routeStats').innerHTML =
+                    `Событий: <strong>${ordered.length}</strong> в маршруте · участки отмечены разными цветами`;
             }
         }
 
-        document.getElementById('btnClear').addEventListener('click', () => { selectedIds.clear(); updateApp(); map.setView([55.1700, 61.3700], 11); });
-        
+        document.getElementById('btnClear').addEventListener('click', () => {
+            selectedIds.clear();
+            updateApp();
+            map.setView([55.1700, 61.3700], 11);
+        });
+
         document.getElementById('btnFitRoute').addEventListener('click', () => {
-            if(routePinMarkers.length > 0) {
+            if (routePinMarkers.length > 0) {
                 map.fitBounds(L.featureGroup(routePinMarkers).getBounds().pad(0.2));
             }
         });
