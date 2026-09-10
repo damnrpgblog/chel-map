@@ -36,14 +36,14 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        body {
+        /* Делаем высоту естественной для встраивания в статью */
+        html, body {
+            height: auto;
+            min-height: 100%;
+            background: var(--bg-app);
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             color: var(--text-dark);
-            background: var(--bg-app);
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
+            overflow-x: hidden;
         }
 
         /* УБИРАЕМ АТРИБУЦИЮ LEAFLET */
@@ -59,7 +59,6 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            flex-shrink: 0;
             z-index: 20;
         }
 
@@ -71,7 +70,6 @@
         .app-title span {
             font-weight: 400;
             opacity: 0.9;
-            display: inline-block;
         }
 
         .app-badge {
@@ -86,33 +84,31 @@
 
         /* ОСНОВНОЙ БЛОК */
         .app-body {
-            flex: 1;
-            display: flex;
-            position: relative;
-            overflow: hidden;
-            flex-direction: row;
-        }
-
-        /* САЙДБАР */
-        .sidebar {
-            width: 380px;
-            background: var(--bg-panel);
-            box-shadow: 2px 0 12px rgba(0,0,0,0.03);
             display: flex;
             flex-direction: column;
-            z-index: 10;
+            width: 100%;
         }
 
-        /* КАРТА */
+        /* КАРТА (БОЛЬШАЯ И НАГЛЯДНАЯ) */
         .map-wrapper {
-            flex: 1;
+            width: 100%;
+            height: 420px; /* Увеличено для отличного обзора */
             position: relative;
             background: #e5e5e5;
+            border-bottom: 2px solid var(--brand-primary);
         }
 
         #map {
             width: 100%;
             height: 100%;
+        }
+
+        /* САЙДБАР И КОНТЕНТ */
+        .sidebar {
+            width: 100%;
+            background: var(--bg-panel);
+            display: flex;
+            flex-direction: column;
         }
 
         /* Фильтры */
@@ -130,7 +126,7 @@
         .filter-bar::-webkit-scrollbar { display: none; }
 
         .filter-chip {
-            padding: 6px 12px;
+            padding: 6px 14px;
             border-radius: 20px;
             border: 1px solid var(--border-light);
             background: var(--bg-app);
@@ -147,11 +143,52 @@
             border-color: var(--brand-primary);
         }
 
-        /* Список */
-        .events-list {
+        /* ПАНЕЛЬ МАРШРУТА ПРЯМО ПОД КАРТОЙ И ФИЛЬТРАМИ */
+        .route-summary-panel {
+            background: var(--bg-panel);
+            border-bottom: 1px solid var(--border-light);
+            padding: 14px 16px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .route-stats {
+            font-size: 13px;
+            margin-bottom: 10px;
+            line-height: 1.4;
+            color: var(--text-gray);
+        }
+        .route-stats strong { color: var(--text-dark); font-weight: 600; }
+
+        .conflict-alert {
+            background: #fff8e6;
+            color: #926c07;
+            border: 1px solid #fcebb6;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 12px;
+            margin-bottom: 10px;
+            display: none;
+        }
+        .conflict-alert.visible { display: block; }
+
+        .btn-group { display: flex; gap: 8px; }
+        .btn {
+            padding: 11px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
             flex: 1;
-            overflow-y: auto;
-            padding: 12px 16px;
+            text-align: center;
+        }
+        .btn-primary { background: var(--brand-primary); color: var(--brand-white); }
+        .btn-primary:disabled { background: #cbd5e1; cursor: not-allowed; }
+        .btn-outline { background: transparent; border: 1px solid var(--border-light); color: var(--text-gray); flex: 0.3; }
+
+        /* СПИСОК СОБЫТИЙ СВОБОДНО РАСКРЫВАЕТСЯ */
+        .events-list {
+            padding: 14px 16px;
             display: flex;
             flex-direction: column;
             gap: 10px;
@@ -229,51 +266,7 @@
             flex-shrink: 0;
         }
 
-        /* НИЖНЯЯ ПАНЕЛЬ */
-        .route-summary-panel {
-            background: var(--bg-panel);
-            border-top: 1px solid var(--border-light);
-            padding: 16px;
-            box-shadow: 0 -4px 16px rgba(0,0,0,0.05);
-            z-index: 20;
-        }
-
-        .route-stats {
-            font-size: 13px;
-            margin-bottom: 12px;
-            line-height: 1.4;
-            color: var(--text-gray);
-        }
-        .route-stats strong { color: var(--text-dark); font-weight: 600; }
-
-        .conflict-alert {
-            background: #fff8e6;
-            color: #926c07;
-            border: 1px solid #fcebb6;
-            border-radius: 6px;
-            padding: 8px 12px;
-            font-size: 12px;
-            margin-bottom: 10px;
-            display: none;
-        }
-        .conflict-alert.visible { display: block; }
-
-        .btn-group { display: flex; gap: 8px; }
-        .btn {
-            padding: 10px 14px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            border: none;
-            flex: 1;
-            text-align: center;
-        }
-        .btn-primary { background: var(--brand-primary); color: var(--brand-white); }
-        .btn-primary:disabled { background: #cbd5e1; cursor: not-allowed; }
-        .btn-outline { background: transparent; border: 1px solid var(--border-light); color: var(--text-gray); flex: 0.4; }
-
-        /* МАРКЕРЫ НА КАРТАХ */
+        /* МАРКЕРЫ И ПОПАПЫ */
         .route-number-pin {
             background: var(--brand-primary);
             color: var(--brand-white);
@@ -295,40 +288,6 @@
         .popup-card h4 { font-size: 14px; margin: 4px 0; color: var(--text-dark); }
         .popup-btn { width: 100%; padding: 8px; border-radius: 6px; background: var(--brand-primary); color: white; border: none; margin-top: 10px; font-weight: 600; }
         .popup-btn.selected { background: var(--bg-app); color: var(--brand-primary); border: 1px solid var(--brand-primary); }
-
-        /* АДАПТАЦИЯ ДЛЯ МОБИЛЬНЫХ */
-        @media (max-width: 900px) {
-            .app-body {
-                flex-direction: column;
-            }
-
-            .map-wrapper {
-                width: 100%;
-                height: 280px;
-                flex: none;
-                border-bottom: 2px solid var(--brand-primary);
-                z-index: 5;
-            }
-
-            .sidebar {
-                width: 100%;
-                flex: 1;
-                display: flex;
-                flex-direction: column;
-                box-shadow: none;
-            }
-
-            .app-title { font-size: 15px; }
-            .app-title span { display: none; }
-            
-            .route-summary-panel {
-                position: sticky;
-                bottom: 0;
-                padding: 12px 16px;
-                background: rgba(255, 255, 255, 0.95);
-                backdrop-filter: blur(8px);
-            }
-        }
     </style>
 </head>
 <body>
@@ -353,20 +312,20 @@
                 <button class="filter-chip" data-cat="fest">Еда</button>
             </div>
 
-            <div class="events-list" id="eventsList"></div>
-
             <div class="route-summary-panel">
                 <div class="conflict-alert" id="conflictAlert">
                     ⚠️ Время некоторых событий пересекается.
                 </div>
                 <div class="route-stats" id="routeStats">
-                    Отметьте события, чтобы составить график.
+                    Отметьте события в списке ниже, чтобы составить график.
                 </div>
                 <div class="btn-group">
                     <button class="btn btn-primary" id="btnFitRoute" disabled>Смотреть маршрут на карте</button>
                     <button class="btn btn-outline" id="btnClear">Сброс</button>
                 </div>
             </div>
+
+            <div class="events-list" id="eventsList"></div>
         </aside>
     </div>
 
@@ -466,7 +425,7 @@
             document.getElementById('btnFitRoute').disabled = ordered.length < 2;
             
             if(ordered.length < 2) {
-                document.getElementById('routeStats').innerHTML = 'Отметьте события, чтобы составить график.';
+                document.getElementById('routeStats').innerHTML = 'Отметьте события в списке ниже, чтобы составить график.';
                 document.getElementById('conflictAlert').classList.remove('visible');
                 drawRoute(ordered);
             } else {
@@ -475,13 +434,10 @@
                     if(ordered[i].endHour > ordered[i+1].startHour) hasConflict = true;
                 }
                 document.getElementById('conflictAlert').classList.toggle('visible', hasConflict);
-                
-                // Строим пешеходный маршрут через OSRM API
                 drawRoute(ordered);
             }
         }
 
-        // ===== ПЕШЕХОДНЫЙ МАРШРУТ ЧЕРЕЗ OSRM API =====
         async function drawRoute(ordered) {
             if(routePolyline) { map.removeLayer(routePolyline); routePolyline = null; }
             routePinMarkers.forEach(m => map.removeLayer(m));
@@ -489,13 +445,11 @@
             
             if(ordered.length < 2) return;
 
-            // Сначала ставим номерные маркеры
             ordered.forEach((evt, idx) => {
                 const icon = L.divIcon({ html: `<div class="route-number-pin">${idx+1}</div>`, className: '', iconSize:[28,28], iconAnchor:[14,14] });
                 routePinMarkers.push(L.marker([evt.lat, evt.lng], {icon, zIndexOffset:1000}).addTo(map));
             });
 
-            // Формируем координаты для OSRM (в формате: долгота,широта;долгота,широта)
             const coordsStr = ordered.map(e => `${e.lng},${e.lat}`).join(';');
             const osrmUrl = `https://router.project-osrm.org/route/v1/foot/${coordsStr}?overview=full&geometries=geojson`;
 
@@ -505,10 +459,8 @@
 
                 if (data.code === 'Ok' && data.routes.length > 0) {
                     const route = data.routes[0];
-                    // Переводим координаты из [lng, lat] обратно в [lat, lng] для Leaflet
                     const pathCoords = route.geometry.coordinates.map(coord => [coord[1], coord[0]]);
                     
-                    // Рисуем пешеходный трек по улицам
                     routePolyline = L.polyline(pathCoords, { 
                         color: 'rgb(0,68,101)', 
                         weight: 4, 
@@ -517,7 +469,6 @@
                         lineJoin: 'round'
                     }).addTo(map);
 
-                    // Считаем точное расстояние по улицам в километрах
                     const distanceKm = (route.distance / 1000).toFixed(1);
                     const walkMinutes = Math.round(route.duration / 60);
                     
@@ -526,7 +477,6 @@
                     throw new Error('Маршрут не найден');
                 }
             } catch (err) {
-                // Если нет соединения с сервером OSRM — строим обычную пунктирную линию
                 const fallbackCoords = ordered.map(e => [e.lat, e.lng]);
                 routePolyline = L.polyline(fallbackCoords, { color: 'rgb(0,68,101)', weight: 3, dashArray: '8,8' }).addTo(map);
                 document.getElementById('routeStats').innerHTML = `Событий: <strong>${ordered.length}</strong> в маршруте`;
@@ -538,7 +488,7 @@
         document.getElementById('btnFitRoute').addEventListener('click', () => {
             if(routePinMarkers.length > 0) {
                 map.fitBounds(L.featureGroup(routePinMarkers).getBounds().pad(0.2));
-                if(window.innerWidth <= 900) window.scrollTo({top: 0, behavior: 'smooth'}); 
+                window.scrollTo({top: 0, behavior: 'smooth'}); 
             }
         });
 
