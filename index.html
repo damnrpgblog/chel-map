@@ -36,13 +36,13 @@
             -webkit-tap-highlight-color: transparent;
         }
 
+        /* ПОЛНОСТЬЮ ОТКЛЮЧАЕМ ВНУТРЕННЮЮ ПРОКРУТКУ */
         html, body {
-            height: auto;
-            min-height: 100%;
+            height: auto !important;
+            overflow: hidden !important;
             background: var(--bg-app);
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             color: var(--text-dark);
-            overflow-x: hidden;
         }
 
         /* УБИРАЕМ АТРИБУЦИЮ LEAFLET */
@@ -58,7 +58,6 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            z-index: 20;
         }
 
         .app-title {
@@ -81,17 +80,16 @@
             font-weight: 600;
         }
 
-        /* ОСНОВНОЙ БЛОК */
         .app-body {
             display: flex;
             flex-direction: column;
             width: 100%;
         }
 
-        /* КВАДРАТНЫЙ ВЬЮПОРТ КАРТЫ (1:1) */
+        /* КАРТА С ОПТИМАЛЬНЫМ ПРОПОРЦИОНАЛЬНЫМ РАЗМЕРОМ */
         .map-wrapper {
             width: 100%;
-            aspect-ratio: 1 / 1; /* Карта всегда идеальный квадрат */
+            height: 380px;
             position: relative;
             background: #e5e5e5;
             border-bottom: 2px solid var(--brand-primary);
@@ -102,7 +100,6 @@
             height: 100%;
         }
 
-        /* САЙДБАР И КОНТЕНТ */
         .sidebar {
             width: 100%;
             background: var(--bg-panel);
@@ -142,7 +139,7 @@
             border-color: var(--brand-primary);
         }
 
-        /* ПАНЕЛЬ МАРШРУТА */
+        /* ПАНЕЛЬ МАРШРУТА ПРЯМО ПОД ФИЛЬТРАМИ */
         .route-summary-panel {
             background: var(--bg-panel);
             border-bottom: 1px solid var(--border-light);
@@ -185,13 +182,15 @@
         .btn-primary:disabled { background: #cbd5e1; cursor: not-allowed; }
         .btn-outline { background: transparent; border: 1px solid var(--border-light); color: var(--text-gray); flex: 0.3; }
 
-        /* СПИСОК СОБЫТИЙ */
+        /* ЕСТЕСТВЕННЫЙ СПИСОК БЕЗ СКРОЛЛБАРОВ */
         .events-list {
             padding: 14px 16px;
             display: flex;
             flex-direction: column;
             gap: 10px;
             background: var(--bg-app);
+            overflow: visible !important;
+            height: auto !important;
         }
 
         .event-card {
@@ -353,9 +352,11 @@
         let baseMarkers = {};
 
         function initMap() {
+            // ОТКЛЮЧАЕМ scrollWheelZoom, чтобы прокрутка страницы над картой не застревала
             map = L.map('map', { 
                 zoomControl: false, 
-                attributionControl: false 
+                attributionControl: false,
+                scrollWheelZoom: false 
             }).setView([55.1700, 61.3700], 11);
 
             L.control.zoom({ position: 'topright' }).addTo(map);
@@ -487,7 +488,6 @@
         document.getElementById('btnFitRoute').addEventListener('click', () => {
             if(routePinMarkers.length > 0) {
                 map.fitBounds(L.featureGroup(routePinMarkers).getBounds().pad(0.2));
-                window.scrollTo({top: 0, behavior: 'smooth'}); 
             }
         });
 
